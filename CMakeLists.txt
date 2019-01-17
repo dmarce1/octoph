@@ -8,6 +8,7 @@ set(dependencies Boost::boost)
 # Octoph executable
 set(source_files
     src/main.cpp
+    src/basis/basis.cpp
     src/cell/cell_client.cpp
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
@@ -16,6 +17,7 @@ set(source_files
 
 set(header_files
     ocotph/octoph.hpp
+    octoph/basis/basis.hpp
     octoph/cell/cell_client.hpp
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp

@@ -9,6 +9,7 @@
 #define OCTOPH_CELL_CELL_LOCATION_HPP
 
 #include "octoph.hpp"
+#include "ndim.hpp"
 #include <bits/stdc++.h>
 #include <cstdint>
 
@@ -16,7 +17,7 @@ class cell_location {
 private:
 	using int_type = std::uint64_t;
 	static constexpr int nbits_ = sizeof(int_type)*CHAR_BIT;
-	static constexpr int maxlevel_ = (nbits_ - 1) / ndim;
+	static constexpr int maxlevel_ = (nbits_ - 1) / NDIM;
 	static int msb(int_type);
 	int_type i_;
 public:

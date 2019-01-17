@@ -42,19 +42,19 @@ std::size_t cell_location::locality_id() const {
 }
 
 int cell_location::level() const {
-	return msb(i_) / ndim;
+	return msb(i_) / NDIM;
 }
 
 cell_location cell_location::gen_parent() const {
 	cell_location cell;
-	cell.i_ = i_ >> ndim;
+	cell.i_ = i_ >> NDIM;
 	return cell;
 }
 
 cell_location cell_location::gen_child(child_type ci) const {
 	cell_location cell;
-	if (msb(i_) < nbits_ - ndim) {
-		cell.i_ = (i_ << ndim) | ci;
+	if (msb(i_) < nbits_ - NDIM) {
+		cell.i_ = (i_ << NDIM) | ci;
 	} else {
 		cell.i_ = 0;
 	}
@@ -68,12 +68,12 @@ cell_location cell_location::gen_sibling(dim_type dim, dir_type dir) const {
 	if (dir > 0) {
 		while ((mask & i_ == mask) && mask) {
 			j &= ~mask;
-			mask <<= ndim;
+			mask <<= NDIM;
 		}
 	} else if (dir < 0) {
 		while ((mask & i_ != mask) && mask) {
 			j |= mask;
-			mask <<= ndim;
+			mask <<= NDIM;
 		}
 	}
 	cell.i_ = mask ? (j ^ mask) : 0;

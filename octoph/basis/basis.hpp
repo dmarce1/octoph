@@ -14,10 +14,6 @@
 
 namespace basis {
 
-using basis_type = std::valarray<real>;
-
-basis_type p_to_h( const basis_type& );
-basis_type h_to_p( const basis_type& );
 
 }
 

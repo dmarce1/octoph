@@ -14,13 +14,21 @@ namespace basis {
 static real find_root(const std::function<real(real)>& f, real a, real c);
 
 real legendre_p(int n, real x) {
-	if (n > 1) {
-		return (real(2 * n - 1) * x * legendre_p(n - 1, x) - (n - 1) * legendre_p(n - 2, x)) / real(n);
-	} else if (n == 1) {
-		return x;
+	real p;
+	if( n == 0 ) {
+		p = real(1);
+	} else if( n == 1 ) {
+		p = x;
 	} else {
-		return real(1);
+		real pm1 = x;
+		real pm2 = 1.0;
+		for( int i = 2; i <= n; i++ ) {
+			p =  (real(2 * i - 1) * x * pm1 - real(i - 1) * pm2) / real(i);
+			pm2 = pm1;
+			pm1 = p;
+		}
 	}
+	return p;
 }
 
 real dlegendre_p_dx(int n, real x) {
@@ -77,10 +85,9 @@ static real find_root(const std::function<real(real)>& f, real a, real c) {
 
 }
 
-#ifdef TESTME
+#ifdef TEST_LEGENDRE
 
 #include <iostream>
-#define PMAX 32
 
 int main() {
 	using namespace basis;

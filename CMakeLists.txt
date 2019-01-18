@@ -9,6 +9,8 @@ set(dependencies Boost::boost)
 
 set(source_files
     src/main.cpp
+    src/basis/basis.cpp
+    src/basis/legendre.cpp
     src/cell/cell_client.cpp
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
@@ -17,6 +19,7 @@ set(source_files
 
 set(header_files
     ocotph/octoph.hpp
+    ocotph/svec.hpp
     octoph/basis/basis.hpp
     octoph/basis/legendre.hpp
     octoph/cell/cell_client.hpp
@@ -25,64 +28,33 @@ set(header_files
     octoph/cell/cell_server.hpp
 )
 
-set(dependencies basis)
-
 add_hpx_executable(
-  octoph1d
+  octoph
   DEPENDENCIES
     ${dependencies}
   SOURCES
     ${source_files}
   HEADERS
     ${header_files}
-  FOLDER  "Octoph1d"
+  FOLDER  "Octoph"
 )
 
 
-add_hpx_executable(
-  octoph2d
-  DEPENDENCIES
-    ${dependencies}
-  SOURCES
-    ${source_files}
-  HEADERS
-    ${header_files}
-  FOLDER  "Octoph2d"
-)
 
 
-add_hpx_executable(
-  octoph3d
-  DEPENDENCIES
-    ${dependencies}
-  SOURCES
-    ${source_files}
-  HEADERS
-    ${header_files}
-  FOLDER  "Octoph3d"
-)
+add_executable( legendre_test  src/basis/legendre.cpp octoph/basis/legendre.hpp  )
+add_executable( basis_test  src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp   )
 
-
-add_executable( legendre_test 
-	src/basis/legendre.cpp octoph/basis/legendre.hpp 
-)
-
-add_library( basis 
-	src/basis/basis.cpp 
-	src/basis/legendre.cpp 
-	octoph/basis/basis.hpp 
-	octoph/basis/legendre.hpp 
-)
-
-target_include_directories(basis PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
-target_include_directories(octoph1d      PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
-target_include_directories(octoph2d      PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
-target_include_directories(octoph3d      PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 
-target_compile_options(legendre_test PRIVATE  -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -DTESTME)
-target_compile_options(octoph1d      PRIVATE -DOCTOPH_1D -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result)
-target_compile_options(octoph2d      PRIVATE -DOCTOPH_2D -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result)
-target_compile_options(octoph3d      PRIVATE -DOCTOPH_3D -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result)
+target_compile_options(basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
+target_compile_options(legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
+
+set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -march=native)
+
+target_include_directories(octoph        PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+
+target_compile_options(octoph        PRIVATE ${FLAGS})
 
 

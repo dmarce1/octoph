@@ -15,6 +15,7 @@ set(source_files
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
     src/cell/cell_server.cpp
+    src/matrix/matrix.cpp
 )
 
 set(header_files
@@ -26,6 +27,7 @@ set(header_files
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
+    octoph/matrix/matrix.hpp
 )
 
 add_hpx_executable(
@@ -42,14 +44,17 @@ add_hpx_executable(
 
 
 
-add_executable( legendre_test  src/basis/legendre.cpp octoph/basis/legendre.hpp  )
-add_executable( basis_test  src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp   )
-
+add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp   )
 target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
-target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_compile_options    (basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
 
-target_compile_options(basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
-target_compile_options(legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
+add_executable(            legendre_test src/basis/legendre.cpp octoph/basis/legendre.hpp  )
+target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
+
+add_executable(            matrix_test src/matrix/matrix.cpp octoph/matrix/matrix.hpp  )
+target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX)
 
 set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -march=native)
 

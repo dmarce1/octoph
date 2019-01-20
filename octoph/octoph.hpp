@@ -9,13 +9,16 @@
 #define OCTOPH_OCTOPH_HPP_
 
 #include <array>
+#include "math/math.hpp"
 
 
 using dim_type = int;
 using child_type = int;
 using dir_type = int;
-using real = double;
 
+
+//using real = double;
+using real = math::real;
 
 
 #ifndef NDIM

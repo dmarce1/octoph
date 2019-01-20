@@ -15,6 +15,7 @@ set(source_files
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
     src/cell/cell_server.cpp
+    src/math/math.cpp
     src/matrix/matrix.cpp
 )
 
@@ -28,6 +29,7 @@ set(header_files
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
     octoph/matrix/matrix.hpp
+    octoph/math/math.hpp
 )
 
 add_hpx_executable(
@@ -44,13 +46,18 @@ add_hpx_executable(
 
 
 
-add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp   )
+add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )
 target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options    (basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
 
-add_executable(            legendre_test src/basis/legendre.cpp octoph/basis/legendre.hpp  )
+add_executable(            legendre_test src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp )
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
+
+add_executable            (math_test src/math/math.cpp octoph/math/math.hpp  )
+target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
+
 
 add_executable(            matrix_test src/matrix/matrix.cpp octoph/matrix/matrix.hpp  )
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)

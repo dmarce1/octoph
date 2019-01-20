@@ -1,19 +1,17 @@
 #include "matrix/matrix.hpp"
 #include <tuple>
 
-namespace linear {
-
-mask<row_mask<1, 0, 0>, row_mask<1, 0, 1>, row_mask<0, 1, 1>> test;
 
 
-}
 
 #ifdef TEST_MATRIX
 
 int main() {
-	using row_type = typename linear::row_mask<1,0,0>;
-	linear::matrix<double,4,5> test;
-	row_type::index<1>();
+	std::array<std::array<double,3>,3> a = {{{1,2,3}, {4,5,6}, {7,8,9}}};
+	linear::matrix<double,3,3> test (a);
+	linear::product<linear::matrix<double,3,3>> test1(test,test);
+	linear::matrix<double,3,3> test2 = test1;
+	linear::print(test2);
 	return 0;
 }
 

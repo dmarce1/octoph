@@ -10,15 +10,15 @@
 
 namespace linear {
 template<class A, int N, int M>
-struct comatrix {
+struct comatrix_type{
 	static constexpr std::size_t nrow = A::nrow - 1;
 	static constexpr std::size_t ncol = A::ncol - 1;
 	using value_type = typename A::value_type;
 	const A& a_;
-public:
-	comatrix(const A& a) :
+	comatrix_type(const A& a) :
 			a_(a) {
 	}
+public:
 
 	template<std::size_t I, std::size_t J>
 	inline value_type get() const {
@@ -38,7 +38,16 @@ public:
 		return A::zero(i < N ? i : i + 1, j < M ? j : j + 1);
 	}
 
+	template<class A1, std::size_t I1, std::size_t J1>
+	friend comatrix_type<A1,I1,J1> comatrix(const A1& a);
 };
+
+template<class A, std::size_t I, std::size_t J>
+comatrix_type<A,I,J> comatrix(const A& a ){
+	comatrix_type<A,I,J> b(a);
+	return b;
+}
+
 }
 
 #endif /* OCTOPH_MATRIX_COMATRIX_HPP_ */

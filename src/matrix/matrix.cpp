@@ -9,7 +9,7 @@
 int main() {
 
 //	std::array<std::array<double,3>,3> a = { { {1,0,0}, {0,1,0}, {0,0,1}}};
-	std::array<std::array<double,3>,3> a = { { {1,2,0}, {4,5,6}, {7,8,9}}};
+	std::array<std::array<double,3>,3> a = { { {1,0,0}, {0,1,0}, {0,0,1}}};
 	using mask_type = linear::mask<linear::integer_sequence<std::size_t,1,1,0>,linear::integer_sequence<std::size_t,1,1,1>,linear::integer_sequence<std::size_t,1,1,1>>;
 	//using mask_type = linear::mask_all_true<3,3>;
 
@@ -25,10 +25,12 @@ int main() {
 //	printf( "\n");
 ///
 	print(test2);
-//	linear::comatrix<linear::product<linear::matrix<double,3,3>>,1,2> co(test1);
+	auto c = linear::comatrix<decltype(test),1,2>(test);
 //	printf( "\n");
 //	linear::matrix<double,2,2> test3 = co;
 //	print(test3);
+	auto d = linear::determinant(test);
+	printf( "%e\n", d.get());
 	return 0;
 }
 

@@ -8,6 +8,8 @@
 #ifndef OCTOPH_MATRIX_MASK_HPP_
 #define OCTOPH_MATRIX_MASK_HPP_
 
+#include <cassert>
+
 namespace linear {
 
 template<class T, T First, T ...Rest>
@@ -37,22 +39,21 @@ public:
 	using type = T;
 	using next_sequence = integer_sequence<T,Rest...>;
 	static constexpr std::size_t N = 1 + sizeof...(Rest);
-	static constexpr std::array<T,N> values_ = { First, Rest... };
 
 	using indexes = typename integer_sequence_cat<T,integer_sequence<T,First>,typename integer_sequence_inc<T, typename next_sequence::indexes,First>::type>::type;
 	template<std::size_t I>
 	static constexpr T get() {
 		static_assert(I < N);
-		return values_[I];
+		constexpr std::array<T,N> values = { First, Rest... };
+		return values[I];
 	}
 
 	static T get(std::size_t i) {
-		return values_[i];
+		assert( i < N );
+		static constexpr std::array<T,N> values = { First, Rest... };
+		return values[i];
 	}
 };
-
-template<class T, T First, T ...Rest>
-constexpr std::array<T,integer_sequence<T, First, Rest...>::N> integer_sequence<T, First, Rest...>::values_;
 
 template<class T, T Last>
 class integer_sequence<T, Last> : public std::integer_sequence<T, Last> {
@@ -60,16 +61,16 @@ public:
 	using type = T;
 	using indexes = integer_sequence<T,Last>;
 	static constexpr std::size_t N = 1;
-	static constexpr std::array<T,1> values_ = { Last };
 
 	template<std::size_t I>
 	static constexpr T get() {
 		static_assert(I==0);
-		return values_[0];
+		return Last;
 	}
 
 	static T get(std::size_t i) {
-		return values_[0];
+		assert( i == 0 );
+		return Last;
 	}
 };
 
@@ -89,6 +90,8 @@ struct mask {
 	}
 
 	static bool get(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return type::get(i * M + j);
 	}
 
@@ -100,6 +103,8 @@ struct mask {
 	}
 
 	static std::size_t index(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return type::indexes::get(i * M + j) - 1;
 	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
@@ -129,6 +134,8 @@ public:
 	}
 
 	static bool get(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return type::get(i * M + j);
 	}
 
@@ -140,6 +147,8 @@ public:
 	}
 
 	static std::size_t index(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return type::indexes::get(i * M + j) - 1;
 	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
@@ -170,6 +179,8 @@ public:
 	}
 
 	static bool get(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return true;
 	}
 
@@ -181,6 +192,8 @@ public:
 	}
 
 	static std::size_t index(std::size_t i, std::size_t j) {
+		assert( i < N );
+		assert( j < M );
 		return i * M + j;
 	}
 };

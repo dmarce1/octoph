@@ -6,6 +6,7 @@
  */
 
 #ifndef OCTOPH_MATRIX_MATRIX_HPP_
+
 #define OCTOPH_MATRIX_MATRIX_HPP_
 
 #include <functional>
@@ -20,10 +21,11 @@ struct matrix {
 	using value_type = T;
 	static constexpr std::size_t nrow = N;
 	static constexpr std::size_t ncol = M;
-	static constexpr std::size_t size = MASK::size;
+	static constexpr MASK mask_ = MASK();
+	static constexpr std::size_t size = mask_.size;
 
 private:
-	std::array<T,size> a_;
+	std::array<T, size> a_;
 
 	template<class A, std::size_t I, std::size_t J>
 	friend class copy;
@@ -32,16 +34,15 @@ private:
 	struct copy {
 		inline copy(matrix& me, const A& other) {
 			constexpr bool this_on = !zero<I, J>();
-			constexpr bool other_on = !A::template zero<I, J>();
+			const bool other_on = !other.template zero<I, J>();
 			static_assert(!(!this_on && other_on), "linear::copy - array shape mismatch");
 			constexpr bool last = (I == 0) && (J == 0);
-			constexpr std::size_t NI = (I == 0) ? (N - 1) : (I - 1);
-			constexpr std::size_t NJ = (I == 0) ? ((J == 0) ? 0 : (J - 1)) : J;
+			constexpr std::size_t NI = (I == 0) ? 0 : ((J == 0) ? (I - 1) : I);
+			constexpr std::size_t NJ = (J == 0) ? (M - 1) : J - 1;
 			if (!last) {
 				copy<A, NI, NJ> f(me, other);
 			}
-			auto& same = me.a_[MASK::template index<I, J>()];
-			same = this_on ? (other_on ? other.template get<I, J>() : T(0)) : same;
+			me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
 		}
 	};
 
@@ -52,7 +53,7 @@ private:
 		if (!((J1 == 0) && (I1 == 0))) {
 			initialize<I2, J2>(init);
 		}
-		if (MASK::template get<I1, J1>()) {
+		if (mask_.template get<I1, J1>()) {
 			get<I1, J1>() = init[I1][J1];
 		}
 	}
@@ -70,11 +71,17 @@ public:
 		copy<A, N - 1, M - 1> f(*this, other);
 	}
 
+	template<class A>
+	matrix& operator=(const A& other) {
+		copy<A, N - 1, M - 1> f(*this, other);
+		return *this;
+	}
+
 	template<std::size_t I, std::size_t J>
 	inline T get() const {
 		static_assert(I < N);
 		static_assert(J < M);
-		return MASK::template get<I, J>() ? a_[MASK::template index<I, J>()] : 0;
+		return mask_.template get<I, J>() ? a_[mask_.template index<I, J>()] : 0;
 	}
 
 	template<std::size_t I, std::size_t J>
@@ -82,23 +89,27 @@ public:
 		static T dummy = T(0);
 		static_assert(I < N);
 		static_assert(J < M);
-		return MASK::template get<I, J>() ? a_[MASK::template index<I, J>()] : dummy;
+		return mask_.template get<I, J>() ? a_[mask_.template index<I, J>()] : dummy;
 	}
 
 	value_type operator()(std::size_t i, std::size_t j) const {
-		if( zero(i,j)) {
+		assert(i < N);
+		assert(j < M);
+		if (zero(i, j)) {
 			return value_type(0);
 		} else {
-			return a_[MASK::index(i, j)];
+			return a_[mask_.index(i, j)];
 		}
 	}
 
 	value_type& operator()(std::size_t i, std::size_t j) {
-		if( zero(i,j)) {
+		assert(i < N);
+		assert(j < M);
+		if (zero(i, j)) {
 			static value_type dummy = value_type(0);
 			return dummy;
 		} else {
-			return a_[MASK::index(i, j)];
+			return a_[mask_.index(i, j)];
 		}
 	}
 
@@ -106,11 +117,13 @@ public:
 	static constexpr bool zero() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return (MASK::template get<I, J>() == false);
+		return (mask_.template get<I, J>() == false);
 	}
 
-	static bool zero(int i, int j) {
-		return (MASK::get(i, j) == false);
+	bool zero(int i, int j) const {
+		assert(i < N);
+		assert(j < M);
+		return (mask_.get(i, j) == false);
 	}
 
 };
@@ -119,7 +132,7 @@ template<class A>
 void print(const A& a) {
 	for (int i = 0; i < A::nrow; i++) {
 		for (int j = 0; j < A::ncol; j++) {
-			printf("%16e ", a(i, j));
+			printf("%16e ", double(a(i, j)));
 		}
 		printf("\n");
 	}

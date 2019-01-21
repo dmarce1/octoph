@@ -6,6 +6,13 @@ find_package(Boost REQUIRED)
 
 set(dependencies Boost::boost)
 
+set( matrix_headers
+    octoph/matrix/comatrix.hpp
+    octoph/matrix/determinant.hpp
+    octoph/matrix/mask.hpp
+    octoph/matrix/matrix.hpp
+    octoph/matrix/product.hpp
+ )
 
 set(source_files
     src/main.cpp
@@ -28,7 +35,7 @@ set(header_files
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
-    octoph/matrix/matrix.hpp
+ 	${matrix_headers}
     octoph/math/math.hpp
 )
 
@@ -59,9 +66,9 @@ target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
 
-add_executable(            matrix_test src/matrix/matrix.cpp octoph/matrix/matrix.hpp  )
+add_executable(            matrix_test src/matrix/matrix.cpp ${matrix_headers}  )
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
-target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX)
+target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX -D_GLIBCXX_DEBUG)
 
 set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -march=native)
 

@@ -1,17 +1,38 @@
 #include "matrix/matrix.hpp"
-#include <tuple>
+#include "matrix/product.hpp"
+#include "matrix/determinant.hpp"
 
 
+namespace linear {
+
+
+
+
+}
 
 
 #ifdef TEST_MATRIX
 
 int main() {
-	std::array<std::array<double,3>,3> a = {{{1,2,3}, {4,5,6}, {7,8,9}}};
-	linear::matrix<double,3,3> test (a);
+
+	std::array<std::array<double,3>,3> a = { { {1,0,0}, {0,1,0}, {1,0,1}}};
+//	std::array<std::array<double,3>,3> a = { { {1,2,3}, {4,5,6}, {7,8,9}}};
+	using mask_type = linear::mask<linear::integer_sequence<std::size_t,1,1,1>,linear::integer_sequence<std::size_t,1,1,1>,linear::integer_sequence<std::size_t,1,1,1>>;
+	//using mask_type = linear::mask_all_true<3,3>;
+	printf( "\n");
+	linear::matrix<double,3,3,mask_type> test (a);
+	print(test);
+	printf( "\n");
 	linear::product<linear::matrix<double,3,3>> test1(test,test);
 	linear::matrix<double,3,3> test2 = test1;
-	linear::print(test2);
+
+	printf( "\n");
+
+	print(test2);
+	linear::comatrix<linear::product<linear::matrix<double,3,3>>,1,2> co(test1);
+	printf( "\n");
+	linear::matrix<double,2,2> test3 = co;
+	print(test3);
 	return 0;
 }
 

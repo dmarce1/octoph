@@ -70,7 +70,7 @@ private:
 
 public:
 
-	constexpr bool zero() {
+	constexpr bool zero() const {
 		return some_row_zero<A>::value || some_col_zero<A>::value;
 	}
 
@@ -82,8 +82,12 @@ public:
 			auto b = comatrix<A, 0, I>(a);
 			auto detB = determinant(b);
 			compute<A0, N, IM1> next;
-			if (!a.template zero<0, I>()) {
-				return next(a) + value_type(sign) * detB.get() * a.template get<0, I>();
+			if (!a.template zero<0, I>() && !detB.zero()) {
+				if (sign == 1) {
+					return next(a) + detB.get() * a.template get<0, I>();
+				} else {
+					return next(a) + value_type(-1) * detB.get() * a.template get<0, I>();
+				}
 			} else {
 				return next(a);
 			}
@@ -95,8 +99,11 @@ public:
 		value_type operator()(const A0& a) {
 			auto b = comatrix<A, 0, 0>(a);
 			auto detB = determinant(b);
-			auto rc = detB.get() * a.template get<0, 0>();
-			return rc;
+			if (!a.template zero<0, 0>() && !detB.zero()) {
+				return detB.get() * a.template get<0, 0>();
+			} else {
+				return value_type(0);
+			}
 		}
 	};
 
@@ -116,7 +123,7 @@ private:
 public:
 	inline value_type get() const {
 		compute<A, nrow - 1, nrow - 1> f;
-		return f(a_);;
+		return f(a_);
 	}
 	template<class A1>
 	friend determinant_type<A1> determinant(const A1& a);

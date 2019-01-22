@@ -34,10 +34,6 @@ public:
 		return A::template zero<I < N ? I : I + 1, J < M ? J : J + 1>();
 	}
 
-	static bool zero(int i, int j)  {
-		return A::zero(i < N ? i : i + 1, j < M ? j : j + 1);
-	}
-
 	template<class A1, std::size_t I1, std::size_t J1>
 	friend comatrix_type<A1,I1,J1> comatrix(const A1& a);
 };

@@ -13,6 +13,7 @@ set( matrix_headers
     octoph/matrix/mask.hpp
     octoph/matrix/matrix.hpp
     octoph/matrix/product.hpp
+    octoph/matrix/QR.hpp
     octoph/matrix/transpose.hpp
  )
 

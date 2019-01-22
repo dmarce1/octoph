@@ -126,6 +126,15 @@ public:
 		return (mask_.get(i, j) == false);
 	}
 
+	matrix& operator-=( const matrix& other ) {
+		for( int n = 0; n < nrow; n++ ) {
+			for( int m = 0; m < ncol; m++ ) {
+				(*this)(n,m) -= other(n,m);
+			}
+		}
+		return *this;
+	}
+
 };
 
 template<class A>

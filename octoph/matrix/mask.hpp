@@ -47,12 +47,6 @@ public:
 		constexpr std::array<T,N> values = { First, Rest... };
 		return values[I];
 	}
-
-	static T get(std::size_t i) {
-		assert( i < N );
-		static constexpr std::array<T,N> values = { First, Rest... };
-		return values[i];
-	}
 };
 
 template<class T, T Last>
@@ -65,11 +59,6 @@ public:
 	template<std::size_t I>
 	static constexpr T get() {
 		static_assert(I==0);
-		return Last;
-	}
-
-	static T get(std::size_t i) {
-		assert( i == 0 );
 		return Last;
 	}
 };
@@ -87,12 +76,6 @@ struct mask {
 		static_assert(I<N);
 		static_assert(J<M);
 		return type::template get<I * M + J>();
-	}
-
-	static bool get(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return type::get(i * M + j);
 	}
 
 	template<std::size_t I, std::size_t J>
@@ -131,12 +114,6 @@ public:
 		static_assert(I==0);
 		static_assert(J<M);
 		return type::template get<I * M + J>();
-	}
-
-	static bool get(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return type::get(i * M + j);
 	}
 
 	template<std::size_t I, std::size_t J>
@@ -178,10 +155,35 @@ public:
 		return true;
 	}
 
-	static bool get(std::size_t i, std::size_t j) {
+
+	template<std::size_t I, std::size_t J>
+	static constexpr std::size_t index() {
+		static_assert(I<N);
+		static_assert(J<M);
+		return I * M + J;
+	}
+
+	static std::size_t index(std::size_t i, std::size_t j) {
 		assert( i < N );
 		assert( j < M );
-		return true;
+		return i * M + j;
+	}
+};
+
+
+
+template<std::size_t N0>
+class mask_upper_triangular {
+public:
+	static constexpr std::size_t N = N0;
+	static constexpr std::size_t M = N0;
+	static constexpr std::size_t size = ((N+1)*N)/2;
+
+	template<std::size_t I, std::size_t J>
+	static constexpr bool get() {
+		static_assert(I<N);
+		static_assert(J<M);
+		return J >= I;
 	}
 
 	template<std::size_t I, std::size_t J>

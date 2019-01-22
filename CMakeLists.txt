@@ -55,6 +55,8 @@ add_hpx_executable(
 
 
 
+set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -std=c++17 -march=native)
+
 
 add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )
 target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
@@ -72,8 +74,6 @@ target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 add_executable(            matrix_test src/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX -D_GLIBCXX_DEBUG)
-
-set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -march=native)
 
 target_include_directories(octoph        PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 

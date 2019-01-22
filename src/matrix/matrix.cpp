@@ -29,7 +29,7 @@ int main() {
 	counter.stop();
 	printf( "%i\n", int(counter.read()));
 	decltype(A) b, c;
-	linear::QR_decomposition<decltype(A),2>(A,b, c);
+	linear::QR_decomposition_type<decltype(A),2> gg(A);
 	return 0;
 }
 

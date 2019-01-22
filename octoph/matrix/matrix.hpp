@@ -39,7 +39,7 @@ private:
 			constexpr bool last = (I == 0) && (J == 0);
 			constexpr std::size_t NI = (I == 0) ? 0 : ((J == 0) ? (I - 1) : I);
 			constexpr std::size_t NJ = (J == 0) ? (M - 1) : J - 1;
-			if (!last) {
+			if constexpr(!last) {
 				copy<A, NI, NJ> f(me, other);
 			}
 			me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
@@ -50,10 +50,10 @@ private:
 	void initialize(const std::array<std::array<value_type, M>, N>& init) {
 		constexpr std::size_t J2 = (J1 == 0) ? 0 : ((I1 == 0) ? (J1 - 1) : J1);
 		constexpr std::size_t I2 = (I1 == 0) ? (N - 1) : (I1 - 1);
-		if (!((J1 == 0) && (I1 == 0))) {
+		if constexpr(!((J1 == 0) && (I1 == 0))) {
 			initialize<I2, J2>(init);
 		}
-		if (mask_.template get<I1, J1>()) {
+		if constexpr(mask_.template get<I1, J1>()) {
 			get<I1, J1>() = init[I1][J1];
 		}
 	}
@@ -95,7 +95,7 @@ public:
 	value_type operator()(std::size_t i, std::size_t j) const {
 		assert(i < N);
 		assert(j < M);
-		if (zero(i, j)) {
+		if constexpr(zero(i, j)) {
 			return value_type(0);
 		} else {
 			return a_[mask_.index(i, j)];
@@ -105,7 +105,7 @@ public:
 	value_type& operator()(std::size_t i, std::size_t j) {
 		assert(i < N);
 		assert(j < M);
-		if (zero(i, j)) {
+		if constexpr(zero(i, j)) {
 			static value_type dummy = value_type(0);
 			return dummy;
 		} else {

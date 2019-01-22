@@ -28,7 +28,7 @@ private:
 		inline value_type operator()(const A& a, const B& b) const {
 			static constexpr std::size_t I = L - ITER;
 			const execute<N, M, ITER - 1> next;
-			if( !(a.template zero<N,I>() || b.template zero<N,I>() )) {
+			if constexpr( !(a.template zero<N,I>() || b.template zero<I,M>() )) {
 				return a.template get<N, I>() * b.template get<I, M>() + next(a, b);
 			} else {
 				return next(a, b);
@@ -40,7 +40,7 @@ private:
 	struct execute<N, M, 1> {
 		inline value_type operator()(const A& a, const B& b) const {
 			static constexpr std::size_t I = L - 1;
-			if( !(a.template zero<N,I>() || b.template zero<N,I>() )) {
+			if constexpr( !(a.template zero<N,I>() || b.template zero<I,M>() )) {
 				return a.template get<N, I>() * b.template get<I, M>();
 			} else {
 				return value_type(0);
@@ -68,6 +68,46 @@ public:
 		static_assert(I<nrow);
 		static_assert(J<ncol);
 		return false;
+	}
+
+
+	template <class AA, class BB>
+	friend product_type<AA,BB> product(const AA& a, const BB& b);
+};
+
+
+
+template<class A>
+struct product_type<A,typename A::value_type> {
+	static constexpr std::size_t nrow = A::nrow;
+	static constexpr std::size_t ncol = A::ncol;
+	using value_type = typename A::value_type;
+
+private:
+
+	A a_;
+	value_type b_;
+
+
+	product_type(const A& a, const value_type& b) :
+			a_(a), b_(b) {
+
+	}
+
+
+public:
+	template<std::size_t I, std::size_t J>
+	value_type get() const {
+		static_assert(I<nrow);
+		static_assert(J<ncol);
+		return a_.template get<I,J>() * b_;
+	}
+
+	template<std::size_t I, std::size_t J>
+	static constexpr bool zero() {
+		static_assert(I<nrow);
+		static_assert(J<ncol);
+		return A::template zero<I,J>();
 	}
 
 

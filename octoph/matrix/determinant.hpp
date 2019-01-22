@@ -26,17 +26,67 @@ class determinant_type {
 	using value_type = typename A::value_type;
 	const A& a_;
 
-	template<class A0, std::size_t N,  std::size_t I>
+private:
+
+	template<class A0, std::size_t I, std::size_t J = ncol - 1>
+	struct row_zero {
+		static constexpr bool value = A0::template zero<I, J>() && row_zero<A0, I, J - 1>::value;
+	};
+
+	template<class A0, std::size_t I>
+	struct row_zero<A0, I, 0> {
+		static constexpr bool value = A0::template zero<I, 0>();
+	};
+
+	template<class A0, std::size_t I = nrow - 1>
+	struct some_row_zero {
+		static constexpr bool value = row_zero<A0, I>::value || some_row_zero<A0, I - 1>::value;
+	};
+
+	template<class A0>
+	struct some_row_zero<A0, 0> {
+		static constexpr bool value = row_zero<A0, 0>::value;
+	};
+
+	template<class A0, std::size_t J, std::size_t I = nrow - 1>
+	struct col_zero {
+		static constexpr bool value = A0::template zero<I, J>() && col_zero<A0, I, J - 1>::value;
+	};
+
+	template<class A0, std::size_t I>
+	struct col_zero<A0, 0, I> {
+		static constexpr bool value = A0::template zero<0, I>();
+	};
+
+	template<class A0, std::size_t J = ncol - 1>
+	struct some_col_zero {
+		static constexpr bool value = col_zero<A0, J>::value || some_col_zero<A0, J - 1>::value;
+	};
+
+	template<class A0>
+	struct some_col_zero<A0, 0> {
+		static constexpr bool value = col_zero<A0, 0>::value;
+	};
+
+public:
+
+	constexpr bool zero() {
+		return some_row_zero<A>::value || some_col_zero<A>::value;
+	}
+
+	template<class A0, std::size_t N, std::size_t I>
 	struct compute {
 		value_type operator()(const A0& a) {
-			constexpr value_type sign = ((I % 2) == 0) ? value_type(1) : -value_type(1);
+			constexpr int sign = ((I % 2) == 0) ? 1 : -1;
 			constexpr std::size_t IM1 = I - 1;
 			auto b = comatrix<A, 0, I>(a);
-		 	auto detB = determinant(b);
-			compute<A0,N,IM1> next;
-			auto rc = next(a) + sign * detB.get() * a.template get<0,I>();
-//			printf( "%i %i %e\n", N, I, rc);
-			return rc;
+			auto detB = determinant(b);
+			compute<A0, N, IM1> next;
+			if (!a.template zero<0, I>()) {
+				return next(a) + value_type(sign) * detB.get() * a.template get<0, I>();
+			} else {
+				return next(a);
+			}
 		}
 	};
 
@@ -45,18 +95,16 @@ class determinant_type {
 		value_type operator()(const A0& a) {
 			auto b = comatrix<A, 0, 0>(a);
 			auto detB = determinant(b);
-			auto rc = detB.get() * a.template get<0,0>();
-	//		printf( "%i %i %e\n", N, 0, rc);
+			auto rc = detB.get() * a.template get<0, 0>();
 			return rc;
 		}
 	};
 
-
 	template<class A0>
 	struct compute<A0, 0, 0> {
 		value_type operator()(const A0& a) {
-	//		printf( "%i %i %e\n", 0, 0, a.template get<0,0>());
-			return a.template get<0,0>();
+			//		printf( "%i %i %e\n", 0, 0, a.template get<0,0>());
+			return a.template get<0, 0>();
 		}
 	};
 
@@ -67,7 +115,7 @@ private:
 
 public:
 	inline value_type get() const {
-		compute<A, nrow-1, nrow - 1> f;
+		compute<A, nrow - 1, nrow - 1> f;
 		return f(a_);;
 	}
 	template<class A1>

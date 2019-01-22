@@ -9,9 +9,11 @@ set(dependencies Boost::boost)
 set( matrix_headers
     octoph/matrix/comatrix.hpp
     octoph/matrix/determinant.hpp
+    octoph/matrix/inverse.hpp
     octoph/matrix/mask.hpp
     octoph/matrix/matrix.hpp
     octoph/matrix/product.hpp
+    octoph/matrix/transpose.hpp
  )
 
 set(source_files
@@ -66,7 +68,7 @@ target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
 
-add_executable(            matrix_test src/matrix/matrix.cpp ${matrix_headers}  )
+add_executable(            matrix_test src/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX -D_GLIBCXX_DEBUG)
 

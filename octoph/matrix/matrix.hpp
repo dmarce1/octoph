@@ -132,7 +132,7 @@ template<class A>
 void print(const A& a) {
 	for (int i = 0; i < A::nrow; i++) {
 		for (int j = 0; j < A::ncol; j++) {
-			printf("%16e ", double(a(i, j)));
+			printf("%16e ", a(i, j).get());
 		}
 		printf("\n");
 	}

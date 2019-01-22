@@ -93,7 +93,9 @@ private:
 	static thread_local std::atomic<std::uint64_t> tops_;
 	double n_;
 public:
-
+	double get() const {
+		return n_;
+	}
 	inline real() :
 			n_(0.0) {
 	}

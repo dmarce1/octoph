@@ -70,11 +70,6 @@ public:
 		return false;
 	}
 
-	bool zero(int i, int j) const {
-		assert(i < nrow);
-		assert(j < ncol);
-		return false;
-	}
 
 	template <class AA, class BB>
 	friend product_type<AA,BB> product(const AA& a, const BB& b);

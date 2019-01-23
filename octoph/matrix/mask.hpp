@@ -44,7 +44,7 @@ public:
 	template<std::size_t I>
 	static constexpr T get() {
 		static_assert(I < N);
-		constexpr std::array<T,N> values = { First, Rest... };
+		constexpr std::array<T, N> values = { First, Rest... };
 		return values[I];
 	}
 };
@@ -65,6 +65,7 @@ public:
 
 template<class First, class ...Rest>
 struct mask {
+	static constexpr bool is_mask = true;
 	using next_mask = mask<Rest...>;
 	using T = typename First::type;
 	using type = typename integer_sequence_cat<T,First,typename next_mask::type>::type;
@@ -85,25 +86,13 @@ struct mask {
 		return type::indexes::template get<I * M + J>() - 1;
 	}
 
-	static std::size_t index(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return type::indexes::get(i * M + j) - 1;
-	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
-	static void print() {
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < M; j++) {
-				printf("%4i ", int(index(i, j)));
-			}
-			printf("\n");
-		}
-	}
 };
 
 template<class Last>
 class mask<Last> {
 public:
+	static constexpr bool is_mask = true;
 	using T = typename Last::type;
 	using type = Last;
 	static constexpr std::size_t N = 1;
@@ -122,27 +111,13 @@ public:
 		static_assert(J<M);
 		return type::indexes::template get<I * M + J>() - 1;
 	}
-
-	static std::size_t index(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return type::indexes::get(i * M + j) - 1;
-	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
-
-	static void print() {
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < M; j++) {
-				printf("%4i ", int(index(i, j)));
-			}
-			printf("\n");
-		}
-	}
 
 };
 
 template<std::size_t N0, std::size_t M0>
 class mask_all_true {
+	static constexpr bool is_mask = true;
 public:
 	static constexpr std::size_t N = N0;
 	static constexpr std::size_t M = M0;
@@ -155,7 +130,6 @@ public:
 		return true;
 	}
 
-
 	template<std::size_t I, std::size_t J>
 	static constexpr std::size_t index() {
 		static_assert(I<N);
@@ -163,41 +137,45 @@ public:
 		return I * M + J;
 	}
 
-	static std::size_t index(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return i * M + j;
-	}
 };
 
-
-
-template<std::size_t N0>
-class mask_upper_triangular {
+template<class A>
+class mask_derived {
 public:
-	static constexpr std::size_t N = N0;
-	static constexpr std::size_t M = N0;
-	static constexpr std::size_t size = ((N+1)*N)/2;
+
+	static constexpr bool is_mask = true;
+	using matrix_type = typename std::enable_if<A::is_mask,A>::type;
+	static constexpr std::size_t N = A::N;
+	static constexpr std::size_t M = A::M;
+
+	template<std::size_t I, std::size_t J, class T>
+	struct index_helper {
+		using prev = index_helper<I-1,J,int>;
+		static constexpr std::size_t index = prev::index + (A::template zero<I, J>() ? 0 : 1);
+	};
+
+	template<std::size_t J, class T>
+	struct index_helper<0, J, T> {
+		using prev = index_helper<N - 1,J-1,int>;
+		static constexpr std::size_t index = prev::index + (A::template zero<0, J>() ? 0 : 1);
+	};
+
+	static constexpr std::size_t size = N * M;
 
 	template<std::size_t I, std::size_t J>
 	static constexpr bool get() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return J >= I;
+		return !(matrix_type::template zero<I,J>());
 	}
 
 	template<std::size_t I, std::size_t J>
 	static constexpr std::size_t index() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return I * M + J;
+		return index_helper<I, J, int>::index - 1;
 	}
 
-	static std::size_t index(std::size_t i, std::size_t j) {
-		assert( i < N );
-		assert( j < M );
-		return i * M + j;
-	}
 };
 
 }

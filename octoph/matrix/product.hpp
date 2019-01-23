@@ -12,9 +12,10 @@ namespace linear {
 
 template<class A, class B = A>
 struct product_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix && B::is_matrix,decltype(typename A::value_type() * typename B::value_type())>::type;
 	static constexpr std::size_t nrow = A::nrow;
 	static constexpr std::size_t ncol = B::ncol;
-	using value_type = decltype(typename A::value_type() * typename B::value_type());
 
 private:
 
@@ -87,9 +88,10 @@ public:
 
 template<class A>
 struct product_type<A, typename A::value_type> {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static constexpr std::size_t nrow = A::nrow;
 	static constexpr std::size_t ncol = A::ncol;
-	using value_type = typename A::value_type;
 
 private:
 
@@ -113,7 +115,7 @@ public:
 	static constexpr bool zero() {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
-		return A::template zero<I,J>();
+		return A::template zero<I, J>();
 	}
 
 	template<class AA, class BB>

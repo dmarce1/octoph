@@ -20,10 +20,10 @@ determinant_type<A, A::ncol> determinant(const A& a);
 
 template<class A, std::size_t N>
 class determinant_type {
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static constexpr std::size_t nrow = N;
 	static constexpr std::size_t ncol = N;
 	static_assert(N==A::ncol && N==A::nrow);
-	using value_type = typename A::value_type;
 	const A& a_;
 
 private:

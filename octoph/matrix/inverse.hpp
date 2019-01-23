@@ -14,9 +14,10 @@ namespace linear {
 
 template<class A>
 struct inverse_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static constexpr std::size_t nrow = A::ncol;
 	static constexpr std::size_t ncol = A::nrow;
-	using value_type = typename A::value_type;
 
 private:
 	A a_;
@@ -100,7 +101,8 @@ public:
 	constexpr bool zero() const {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
-		return false;
+		using det_type = decltype(determinant(comatrix<A, I, J>(A())));
+		return bool(det_type::zero() || A::template zero<I,J>);
 	}
 
 	template<class AA>

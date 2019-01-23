@@ -12,9 +12,10 @@ namespace linear {
 
 template<class A>
 struct transpose_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static constexpr std::size_t nrow = A::ncol;
 	static constexpr std::size_t ncol = A::nrow;
-	using value_type = typename A::value_type;
 
 private:
 	A a_;

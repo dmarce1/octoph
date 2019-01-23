@@ -1,7 +1,7 @@
 /*
  * comatrix.hpp
  *
- *  Created on: Jan 20, 2019
+ *  Created on: Jan 20, 20
  *      Author: dmarce1
  */
 
@@ -10,10 +10,11 @@
 
 namespace linear {
 template<class A, int N, int M>
-struct comatrix_type{
+struct comatrix_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static constexpr std::size_t nrow = A::nrow - 1;
 	static constexpr std::size_t ncol = A::ncol - 1;
-	using value_type = typename A::value_type;
 	const A& a_;
 	comatrix_type(const A& a) :
 			a_(a) {
@@ -35,12 +36,12 @@ public:
 	}
 
 	template<class A1, std::size_t I1, std::size_t J1>
-	friend comatrix_type<A1,I1,J1> comatrix(const A1& a);
+	friend comatrix_type<A1, I1, J1> comatrix(const A1& a);
 };
 
 template<class A, std::size_t I, std::size_t J>
-comatrix_type<A,I,J> comatrix(const A& a ){
-	comatrix_type<A,I,J> b(a);
+comatrix_type<A, I, J> comatrix(const A& a) {
+	comatrix_type<A, I, J> b(a);
 	return b;
 }
 

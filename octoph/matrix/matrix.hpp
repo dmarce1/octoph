@@ -17,7 +17,7 @@ namespace linear {
 
 template<class T, std::size_t N, std::size_t M, class MASK = mask_all_true<N, M> >
 struct matrix {
-
+	static constexpr bool is_matrix = true;
 	using value_type = T;
 	static constexpr std::size_t nrow = N;
 	static constexpr std::size_t ncol = M;

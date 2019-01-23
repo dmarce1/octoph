@@ -14,10 +14,11 @@ namespace linear {
 
 template<class A, std::size_t L>
 struct column_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static_assert(L<A::ncol);
 	static constexpr std::size_t nrow = A::nrow;
 	static constexpr std::size_t ncol = 1;
-	using value_type = typename A::value_type;
 
 private:
 	const A& a_;
@@ -45,10 +46,11 @@ public:
 
 template<class A, std::size_t L>
 struct block_columns_left_type {
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static_assert(L<=A::ncol);
 	static constexpr std::size_t nrow = A::nrow;
 	static constexpr std::size_t ncol = A::ncol;
-	using value_type = typename A::value_type;
 
 private:
 	const A& a_;
@@ -84,15 +86,25 @@ public:
 
 template<class T, std::size_t N>
 struct QR_decomposition_type {
-	using value_type = typename T::value_type;
+	static constexpr bool is_matrix = true;
+	using value_type = typename std::enable_if<T::is_matrix,typename T::value_type>::type;
 
 	template<class A, class U, std::size_t I>
 	struct execute {
 		auto operator()(const A& a0, U& u0) const {
 			const auto u = column_type<T, I>(u0);
 			const auto a = block_columns_left_type<T, I + 1>(a0);
-			return product(u,transpose(product(product(transpose(a), u), inverse(product(transpose(u), u)))));
+			const auto Ta = transpose(a);
+			const auto Tau = product(Ta, u);
+			const auto Tu = transpose(u);
+			const auto Tuu = product(Tu, u);
+			const auto invTuu = inverse(Tuu);
+			const auto TauinvTuu = product(Tau, invTuu);
+			const auto TTauinvTuu = transpose(TauinvTuu);
+			const auto du = product(u, TTauinvTuu);
+			return du;
 		}
+
 	};
 
 	QR_decomposition_type(T& A) {

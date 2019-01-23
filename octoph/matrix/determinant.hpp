@@ -70,7 +70,7 @@ private:
 
 public:
 
-	constexpr bool zero() const {
+	static constexpr bool zero() {
 		return some_row_zero<A, nrow - 1>::value || some_col_zero<A, ncol - 1>::value;
 	}
 

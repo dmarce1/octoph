@@ -102,7 +102,7 @@ public:
 		static_assert(I<nrow);
 		static_assert(J<ncol);
 		using det_type = decltype(determinant(comatrix<A, I, J>(A())));
-		return bool(det_type::zero() || A::template zero<I,J>);
+		return bool(det_type::zero() || A::template zero<I,J>());
 	}
 
 	template<class AA>

@@ -36,7 +36,7 @@ public:
 	}
 
 	template<std::size_t I, std::size_t J>
-	constexpr bool zero() const {
+	static constexpr bool zero() {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
 		return A::template zero<J,I>();

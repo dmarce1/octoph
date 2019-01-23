@@ -82,8 +82,8 @@ public:
 			auto b = comatrix<A, 0, I>(a);
 			auto detB = determinant(b);
 			compute<A0, M, IM1> next;
-			if constexpr(!a.template zero<0, I>() && !detB.zero()) {
-				if constexpr(sign == 1) {
+			if constexpr (!a.template zero<0, I>() && !detB.zero()) {
+				if constexpr (sign == 1) {
 					return next(a) + detB.get() * a.template get<0, I>();
 				} else {
 					return next(a) + value_type(-1) * detB.get() * a.template get<0, I>();
@@ -99,7 +99,7 @@ public:
 		value_type operator()(const A0& a) {
 			auto b = comatrix<A, 0, 0>(a);
 			auto detB = determinant(b);
-			if constexpr(!a.template zero<0, 0>() && !detB.zero()) {
+			if constexpr (!a.template zero<0, 0>() && !detB.zero()) {
 				return detB.get() * a.template get<0, 0>();
 			} else {
 				return value_type(0);
@@ -122,7 +122,9 @@ private:
 public:
 	inline value_type get() const {
 		compute<A, nrow - 1, nrow - 1> f;
-		return f(a_);
+		if constexpr (!zero()) {
+			return f(a_);
+		}
 	}
 	template<class A1>
 	friend determinant_type<A1, A1::ncol> determinant(const A1& a);
@@ -138,7 +140,7 @@ private:
 
 public:
 
-	constexpr bool zero() const {
+	static constexpr bool zero()  {
 		return false;
 	}
 private:

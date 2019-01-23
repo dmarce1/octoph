@@ -7,11 +7,14 @@ find_package(Boost REQUIRED)
 set(dependencies Boost::boost)
 
 set( matrix_headers
+    octoph/matrix/add.hpp
+    octoph/matrix/column.hpp
     octoph/matrix/comatrix.hpp
     octoph/matrix/determinant.hpp
     octoph/matrix/inverse.hpp
     octoph/matrix/mask.hpp
     octoph/matrix/matrix.hpp
+    octoph/matrix/neg.hpp
     octoph/matrix/product.hpp
     octoph/matrix/QR.hpp
     octoph/matrix/transpose.hpp

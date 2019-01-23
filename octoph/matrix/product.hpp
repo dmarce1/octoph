@@ -51,6 +51,8 @@ private:
 
 	template<class A0, class B0, std::size_t N, std::size_t M, std::size_t ITER = L>
 	struct zero_entry {
+		constexpr zero_entry() {
+		}
 		static constexpr bool value =
 				(A0::template zero<N, L - ITER>() || B0::template zero<L - ITER, M>()) ?
 						zero_entry<A0, B0, N, M, ITER - 1>::value : false;
@@ -58,6 +60,8 @@ private:
 
 	template<class A0, class B0, std::size_t N, std::size_t M>
 	struct zero_entry<A0, B0, N, M, 1> {
+		constexpr zero_entry() {
+		}
 		static constexpr bool value = (A0::template zero<N, L - 1>() || B0::template zero<L - 1, M>());
 	};
 
@@ -67,11 +71,17 @@ private:
 	}
 
 public:
+
 	template<std::size_t I, std::size_t J>
 	value_type get() const {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
-		return a_.template get<I, J>() * b_;
+		if constexpr (zero<I, J>()) {
+			return value_type(0);
+		} else {
+			execute<I, J> f;
+			return f(a_, b_);
+		}
 	}
 
 	template<std::size_t I, std::size_t J>
@@ -86,41 +96,6 @@ public:
 	friend product_type<AA, BB> product(const AA& a, const BB& b);
 };
 
-template<class A>
-struct product_type<A, typename A::value_type> {
-	static constexpr bool is_matrix = true;
-	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
-	static constexpr std::size_t nrow = A::nrow;
-	static constexpr std::size_t ncol = A::ncol;
-
-private:
-
-	A a_;
-	value_type b_;
-
-	product_type(const A& a, const value_type& b) :
-			a_(a), b_(b) {
-
-	}
-
-public:
-	template<std::size_t I, std::size_t J>
-	value_type get() const {
-		static_assert(I<nrow);
-		static_assert(J<ncol);
-		return a_.template get<I, J>() * b_;
-	}
-
-	template<std::size_t I, std::size_t J>
-	static constexpr bool zero() {
-		static_assert(I<nrow);
-		static_assert(J<ncol);
-		return A::template zero<I, J>();
-	}
-
-	template<class AA, class BB>
-	friend product_type<AA, BB> product(const AA& a, const BB& b);
-};
 
 template<class A, class B>
 product_type<A, B> product(const A& a, const B& b) {

@@ -139,25 +139,59 @@ public:
 
 };
 
+template<std::size_t N0>
+class mask_diagonal {
+	static constexpr bool is_mask = true;
+public:
+	static constexpr std::size_t N = N0;
+	static constexpr std::size_t size = N;
+
+	template<std::size_t I, std::size_t J>
+	static constexpr bool get() {
+		static_assert(I<N);
+		static_assert(J<N);
+		return I == J;
+	}
+
+	template<std::size_t I, std::size_t J>
+	static constexpr std::size_t index() {
+		static_assert(I<N);
+		static_assert(J<N);
+		return I;
+	}
+
+};
+
 template<class A>
 class mask_derived {
 public:
 
 	static constexpr bool is_mask = true;
-	using matrix_type = typename std::enable_if<A::is_mask,A>::type;
-	static constexpr std::size_t N = A::N;
-	static constexpr std::size_t M = A::M;
+	using matrix_type = typename std::enable_if<A::is_matrix,A>::type;
+	static constexpr std::size_t N = A::nrow;
+	static constexpr std::size_t M = A::ncol;
 
 	template<std::size_t I, std::size_t J, class T>
 	struct index_helper {
+		constexpr index_helper() {
+		}
 		using prev = index_helper<I-1,J,int>;
 		static constexpr std::size_t index = prev::index + (A::template zero<I, J>() ? 0 : 1);
 	};
 
 	template<std::size_t J, class T>
 	struct index_helper<0, J, T> {
+		constexpr index_helper() {
+		}
 		using prev = index_helper<N - 1,J-1,int>;
 		static constexpr std::size_t index = prev::index + (A::template zero<0, J>() ? 0 : 1);
+	};
+
+	template<class T>
+	struct index_helper<0, 0, T> {
+		constexpr index_helper() {
+		}
+		static constexpr std::size_t index = A::template zero<0, 0>() ? 0 : 1;
 	};
 
 	static constexpr std::size_t size = N * M;
@@ -166,7 +200,7 @@ public:
 	static constexpr bool get() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return !(matrix_type::template zero<I,J>());
+		return !(matrix_type::template zero<I, J>());
 	}
 
 	template<std::size_t I, std::size_t J>

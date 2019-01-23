@@ -1,11 +1,12 @@
 #include "matrix/matrix.hpp"
 #include "matrix/product.hpp"
 #include "matrix/determinant.hpp"
+#include "matrix/add.hpp"
 
 #include <matrix/inverse.hpp>
 #include <matrix/transpose.hpp>
 #include <math/math.hpp>
-
+#include "matrix/add.hpp"
 using real = math::real;
 #include <matrix/QR.hpp>
 
@@ -20,16 +21,16 @@ int main() {
 //auto A = linear::matrix<real,3,3>(a);
 
 	auto B = linear::inverse(A);
-	linear::matrix<real,2,2> C = B;
+	auto C = linear::copy(B);
 
 	math::real::local_counter counter;
 	counter.start();
 	B = linear::inverse(A);
-	C = B;
+//	C = linear::copy(B);
 	counter.stop();
 	printf( "%i\n", int(counter.read()));
 	decltype(A) b, c;
-	linear::QR_decomposition_type<decltype(A),2> gg(A);
+	linear::QR_decomposition(A);
 	return 0;
 }
 

@@ -13,7 +13,13 @@
 
 #include "matrix/mask.hpp"
 
+
 namespace linear {
+
+
+template<class A, std::size_t I, std::size_t J>
+struct init_indexes;
+
 
 template<class T, std::size_t N, std::size_t M, class MASK = mask_all_true<N, M> >
 struct matrix {
@@ -27,8 +33,10 @@ struct matrix {
 private:
 	std::array<T, size> a_;
 
-	template<class A, std::size_t I, std::size_t J>
-	friend class copy;
+	template<class, std::size_t, std::size_t>
+	friend class init_indexes;
+
+	static std::array<std::array<std::size_t, M>, N> indexes;
 
 	template<class A, std::size_t I, std::size_t J>
 	struct copy {
@@ -39,7 +47,7 @@ private:
 			constexpr bool last = (I == 0) && (J == 0);
 			constexpr std::size_t NI = (I == 0) ? 0 : ((J == 0) ? (I - 1) : I);
 			constexpr std::size_t NJ = (J == 0) ? (M - 1) : J - 1;
-			if constexpr(!last) {
+			if constexpr (!last) {
 				copy<A, NI, NJ> f(me, other);
 			}
 			me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
@@ -50,12 +58,17 @@ private:
 	void initialize(const std::array<std::array<value_type, M>, N>& init) {
 		constexpr std::size_t J2 = (J1 == 0) ? 0 : ((I1 == 0) ? (J1 - 1) : J1);
 		constexpr std::size_t I2 = (I1 == 0) ? (N - 1) : (I1 - 1);
-		if constexpr(!((J1 == 0) && (I1 == 0))) {
+		if constexpr (!((J1 == 0) && (I1 == 0))) {
 			initialize<I2, J2>(init);
 		}
-		if constexpr(mask_.template get<I1, J1>()) {
+		if constexpr (mask_.template get<I1, J1>()) {
 			get<I1, J1>() = init[I1][J1];
 		}
+	}
+
+	std::size_t index(std::size_t i, std::size_t j) const {
+		static init_indexes<matrix, N - 1, M - 1> init_indexes_instance(*this);
+		return indexes[i][j];
 	}
 
 public:
@@ -71,9 +84,8 @@ public:
 		copy<A, N - 1, M - 1> f(*this, other);
 	}
 
-	template<class A>
-	matrix& operator=(const A& other) {
-		copy<A, N - 1, M - 1> f(*this, other);
+	matrix& operator=(const matrix& other) {
+		copy<matrix, N - 1, M - 1> f(*this, other);
 		return *this;
 	}
 
@@ -81,35 +93,10 @@ public:
 	inline T get() const {
 		static_assert(I < N);
 		static_assert(J < M);
-		return mask_.template get<I, J>() ? a_[mask_.template index<I, J>()] : 0;
-	}
-
-	template<std::size_t I, std::size_t J>
-	inline T& get() {
-		static T dummy = T(0);
-		static_assert(I < N);
-		static_assert(J < M);
-		return mask_.template get<I, J>() ? a_[mask_.template index<I, J>()] : dummy;
-	}
-
-	value_type operator()(std::size_t i, std::size_t j) const {
-		assert(i < N);
-		assert(j < M);
-		if constexpr(zero(i, j)) {
+		if constexpr (zero<I, J>()) {
 			return value_type(0);
 		} else {
-			return a_[mask_.index(i, j)];
-		}
-	}
-
-	value_type& operator()(std::size_t i, std::size_t j) {
-		assert(i < N);
-		assert(j < M);
-		if constexpr(zero(i, j)) {
-			static value_type dummy = value_type(0);
-			return dummy;
-		} else {
-			return a_[mask_.index(i, j)];
+			return a_[mask_.template index<I, J>()];
 		}
 	}
 
@@ -120,33 +107,52 @@ public:
 		return (mask_.template get<I, J>() == false);
 	}
 
-	bool zero(int i, int j) const {
-		assert(i < N);
-		assert(j < M);
-		return (mask_.get(i, j) == false);
+	T operator()(std::size_t i, std::size_t j) const {
+		return a_[index(i, j)];
 	}
 
-	matrix& operator-=( const matrix& other ) {
-		for( int n = 0; n < nrow; n++ ) {
-			for( int m = 0; m < ncol; m++ ) {
-				(*this)(n,m) -= other(n,m);
-			}
-		}
-		return *this;
+	T& operator()(std::size_t i, std::size_t j) {
+		return a_[index(i, j)];
 	}
 
+	template<class A>
+	friend auto copy(const A&);
+};
+
+template<class T>
+auto copy(const T& A) {
+	using mask_type = mask_derived<T>;
+	using return_type = matrix<typename T::value_type, T::nrow, T::ncol, mask_type>;
+	return return_type(A);
+}
+
+template<class T, std::size_t N, std::size_t M, class MASK>
+std::array<std::array<std::size_t, M>, N> matrix<T, N, M, MASK>::indexes;
+
+
+template<class A, std::size_t I, std::size_t J>
+struct init_indexes {
+	init_indexes(const A& a) {
+		init_indexes<A, I, J - 1> next(a);
+		A::indexes[I][J] = a.mask_.template index<I, J>();
+	}
+};
+
+template<class A, std::size_t I>
+struct init_indexes<A, I, 0> {
+	init_indexes(const A& a) {
+		init_indexes<A, I - 1, A::ncol - 1> next(a);
+		A::indexes[I][0] = a.mask_.template index<I, 0>();
+	}
 };
 
 template<class A>
-void print(const A& a) {
-	for (int i = 0; i < A::nrow; i++) {
-		for (int j = 0; j < A::ncol; j++) {
-			printf("%16e ", a(i, j).get());
-		}
-		printf("\n");
+struct init_indexes<A, 0, 0> {
+	init_indexes(const A& a) {
+		A::indexes[0][0] = a.mask_.template index<0, 0>();
 	}
-}
+};
+
 
 }
-
 #endif /* OCTOPH_MATRIX_MATRIX_HPP_ */

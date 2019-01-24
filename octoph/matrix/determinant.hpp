@@ -28,91 +28,78 @@ class determinant_type {
 
 private:
 
-	template<class A0, std::size_t I, std::size_t J>
-	struct row_zero {
-		static constexpr bool value = A0::template zero<I, J>() && row_zero<A0, I, J - 1>::value;
-	};
+	template<std::size_t I, std::size_t J>
+	static constexpr bool row_zero() {
+		if constexpr (A::template zero<I, J>()) {
+			if constexpr (J > 0) {
+				return row_zero<I, J - 1>();
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
 
-	template<class A0, std::size_t I>
-	struct row_zero<A0, I, 0> {
-		static constexpr bool value = A0::template zero<I, 0>();
-	};
+	template<std::size_t I, std::size_t J>
+	static constexpr bool col_zero() {
+		if constexpr (A::template zero<J, I>()) {
+			if constexpr (J > 0) {
+				return col_zero<I, J - 1>();
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
 
-	template<class A0, std::size_t I>
-	struct some_row_zero {
-		static constexpr bool value = row_zero<A0, I, ncol - 1>::value || some_row_zero<A0, I - 1>::value;
-	};
-
-	template<class A0>
-	struct some_row_zero<A0, 0> {
-		static constexpr bool value = row_zero<A0, 0, ncol - 1>::value;
-	};
-
-	template<class A0, std::size_t J, std::size_t I>
-	struct col_zero {
-		static constexpr bool value = A0::template zero<I, J>() && col_zero<A0, I, J - 1>::value;
-	};
-
-	template<class A0, std::size_t I>
-	struct col_zero<A0, 0, I> {
-		static constexpr bool value = A0::template zero<0, I>();
-	};
-
-	template<class A0, std::size_t J>
-	struct some_col_zero {
-		static constexpr bool value = col_zero<A0, J, nrow - 1>::value || some_col_zero<A0, J - 1>::value;
-	};
-
-	template<class A0>
-	struct some_col_zero<A0, 0> {
-		static constexpr bool value = col_zero<A0, 0, nrow - 1>::value;
-	};
-
+	template<std::size_t I>
+	static constexpr bool determinant_is_zero() {
+		if constexpr (col_zero<I, N - 1>()) {
+			return true;
+		} else if constexpr (row_zero<I, N - 1>()) {
+			return true;
+		} else if constexpr (I == 0) {
+			return false;
+		} else {
+			return determinant_is_zero<I - 1>();
+		}
+	}
 public:
 
 	static constexpr bool zero() {
-		return some_row_zero<A, nrow - 1>::value || some_col_zero<A, ncol - 1>::value;
+		return determinant_is_zero<nrow - 1>();
 	}
 
-	template<class A0, std::size_t M, std::size_t I>
-	struct compute {
-		value_type operator()(const A0& a) {
-			constexpr int sign = ((I % 2) == 0) ? 1 : -1;
-			constexpr std::size_t IM1 = I - 1;
-			auto b = comatrix<A, 0, I>(a);
-			auto detB = determinant(b);
-			compute<A0, M, IM1> next;
-			if constexpr (!a.template zero<0, I>() && !detB.zero()) {
-				if constexpr (sign == 1) {
-					return next(a) + detB.get() * a.template get<0, I>();
+	template<std::size_t M, std::size_t I>
+	auto compute() const {
+		constexpr int sign = ((I % 2) == 0) ? 1 : -1;
+		constexpr std::size_t IM1 = I - 1;
+		auto b = comatrix<A, 0, I>(a_);
+		auto detB = determinant(b);
+		if constexpr (I == 0) {
+			if constexpr (M == 0) {
+				return a_.template get<0, 0>();
+			} else {
+				if constexpr (!A::template zero<0, 0>() && !detB.zero()) {
+					return detB.get() * a_.template get<0, 0>();
 				} else {
-					return next(a) + value_type(-1) * detB.get() * a.template get<0, I>();
+					return value_type(0);
+				}
+			}
+		} else {
+			if constexpr (!A::template zero<0, I>() && !detB.zero()) {
+				if constexpr (sign == 1) {
+					return compute<M, IM1>() + detB.get() * a_.template get<0, I>();
+				} else {
+					return compute<M, IM1>() + value_type(-1) * detB.get() * a_.template get<0, I>();
 				}
 			} else {
-				return next(a);
+				return compute<M, IM1>();
 			}
 		}
-	};
-
-	template<class A0, std::size_t M>
-	struct compute<A0, M, 0> {
-		value_type operator()(const A0& a) {
-			auto b = comatrix<A, 0, 0>(a);
-			auto detB = determinant(b);
-			if constexpr (!a.template zero<0, 0>() && !detB.zero()) {
-				return detB.get() * a.template get<0, 0>();
-			} else {
-				return value_type(0);
-			}
-		}
-	};
-
-	template<class A0>
-	struct compute<A0, 0, 0> {
-		value_type operator()(const A0& a) {
-			return a.template get<0, 0>();
-		}
-	};
+	}
 
 private:
 	determinant_type(const A& a) :
@@ -120,10 +107,11 @@ private:
 	}
 
 public:
-	inline value_type get() const {
-		compute<A, nrow - 1, nrow - 1> f;
+	auto get() const {
 		if constexpr (!zero()) {
-			return f(a_);
+			return compute<nrow - 1, nrow - 1>();
+		} else {
+			return value_type(0);
 		}
 	}
 	template<class A1>
@@ -140,7 +128,7 @@ private:
 
 public:
 
-	static constexpr bool zero()  {
+	static constexpr bool zero() {
 		return false;
 	}
 private:

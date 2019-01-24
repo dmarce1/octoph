@@ -15,7 +15,7 @@ namespace linear {
 template<class A>
 struct inverse_type {
 	static constexpr bool is_matrix = true;
-	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
+	using value_type = typename A::value_type;
 	static constexpr std::size_t nrow = A::ncol;
 	static constexpr std::size_t ncol = A::nrow;
 
@@ -24,58 +24,38 @@ private:
 	std::array<value_type, nrow> dets_;
 	value_type detinv;
 
-	template<class A1, std::size_t I>
-	struct fill_dets {
-		constexpr fill_dets() {
-		}
-		void operator()(inverse_type<A1>& a) const {
-			auto co = comatrix<A, 0, I>(a.a_);
-			using next = fill_dets<A1,I-1>;
-			next f;
-			f(a);
-			const auto det = determinant(co);
-			if constexpr (det.zero()) {
-				a.dets_[I] = value_type(0);
+	template<std::size_t I>
+	void fill_dets() {
+		auto co = comatrix<A, 0, I>(a_);
+		const auto det = determinant(co);
+		if constexpr (det.zero()) {
+			dets_[I] = value_type(0);
+		} else {
+			dets_[I] = det.get();
+			constexpr int si = ((I % 2) == 0) ? 1 : -1;
+			if constexpr (si == 1) {
+				detinv += dets_[I];
 			} else {
-				a.dets_[I] = det.get();
-				constexpr int si = ((I % 2) == 0) ? 1 : -1;
-				if constexpr (si == 1) {
-					a.detinv += a.dets_[I];
-				} else {
-					a.detinv -= a.dets_[I];
-				}
+				detinv -= dets_[I];
 			}
 		}
-	};
+		if constexpr( I > 0 ) {
+			fill_dets<I-1>();
+		}
+	}
 
-	template<class A1>
-	struct fill_dets<A1, 0> {
-		constexpr fill_dets() {
-		}
-		void operator()(inverse_type<A1>& a) const {
-			auto co = comatrix<A, 0, 0>(a.a_);
-			const auto det = determinant(co);
-			if constexpr (det.zero()) {
-				a.dets_[0] = value_type(0);
-			} else {
-				a.dets_[0] = det.get();
-				a.detinv += a.dets_[0];
-			}
-		}
-	};
 
 	template<class A1, std::size_t I>
 	friend class fill_dets;
 
 	inverse_type(const A& a) :
-			a_(a), detinv(0) {
-		fill_dets<A, nrow - 1> f;
-		f(*this);
+			a_(a), detinv(value_type(0)) {
+		fill_dets<nrow - 1>();
 		detinv = value_type(1) / detinv;
 	}
 public:
 	template<std::size_t J, std::size_t I>
-	value_type get() const {
+	auto get() const {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
 		const auto co = comatrix<A, I, J>(a_);

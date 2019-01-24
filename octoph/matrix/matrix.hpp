@@ -90,7 +90,7 @@ public:
 	}
 
 	template<std::size_t I, std::size_t J>
-	inline T get() const {
+	inline auto get() const {
 		static_assert(I < N);
 		static_assert(J < M);
 		if constexpr (zero<I, J>()) {

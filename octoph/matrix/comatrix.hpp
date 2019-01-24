@@ -22,7 +22,7 @@ struct comatrix_type {
 public:
 
 	template<std::size_t I, std::size_t J>
-	inline value_type get() const {
+	inline auto get() const {
 		constexpr std::size_t P = I < N ? I : I + 1;
 		constexpr std::size_t Q = J < M ? J : J + 1;
 		return a_.template get<P, Q>();

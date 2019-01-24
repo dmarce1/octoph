@@ -119,7 +119,7 @@ public:
 	inline real operator+() {
 		return *this;
 	}
-	inline real operator-() {
+	inline real operator-() const {
 		gops_++;
 		tops_++;
 		return real(-n_);
@@ -191,7 +191,7 @@ public:
 	inline integer operator+() {
 		return *this;
 	}
-	inline integer operator-() {
+	inline integer operator-() const {
 		gops_++;
 		tops_++;
 		return integer(-n_);

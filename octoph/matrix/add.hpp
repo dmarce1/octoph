@@ -32,14 +32,24 @@ public:
 
 	template<std::size_t I, std::size_t J>
 	value_type get() const {
-		static_assert(I<nrow);
-		static_assert(J<ncol);
+		static_assert((I < nrow)  && (J < ncol));
 		if constexpr (zero<I, J>()) {
 			return value_type(0);
 		} else {
 			return a_.template get<I, J>() + b_.template get<I, J>();
 		}
 	}
+
+//
+//	template<std::size_t I, std::size_t J>
+//	static constexpr std::size_t op_count() {
+//		static_assert((I < nrow)  && (J < ncol));
+//		if constexpr (A::template zero<I, J>() || B::template zero<I, J>()) {
+//			return 0;
+//		} else {
+//			return A::template op_count<I,J>() + B::template op_count<I,J>() + 1;
+//		}
+//	}
 
 	template<std::size_t I, std::size_t J>
 	static constexpr bool zero() {

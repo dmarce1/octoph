@@ -93,7 +93,7 @@ public:
 				if constexpr (sign == 1) {
 					return compute<M, IM1>() + detB.get() * a_.template get<0, I>();
 				} else {
-					return compute<M, IM1>() + value_type(-1) * detB.get() * a_.template get<0, I>();
+					return compute<M, IM1>() - detB.get() * a_.template get<0, I>();
 				}
 			} else {
 				return compute<M, IM1>();

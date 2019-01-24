@@ -11,6 +11,17 @@ using real = math::real;
 #include <matrix/QR.hpp>
 
 
+
+
+template<std::size_t N>
+class sorted {
+	template< class...Args, class S = std::make_index_sequence<sizeof...(Args)>>
+	void func(std::tuple<Args...>& t, S& s ) {
+
+	}
+
+};
+
 #ifdef TEST_MATRIX
 
 int main() {

@@ -69,13 +69,13 @@ public:
 				if constexpr (si * sj == 1) {
 					return dets_[I] * detinv;
 				} else {
-					return dets_[I] * value_type(-1) * detinv;
+					return -dets_[I] * detinv;
 				}
 			} else {
 				if constexpr (si * sj == 1) {
 					return determinant(co).get() * detinv;
 				} else {
-					return determinant(co).get() * value_type(-1) * detinv;
+					return -determinant(co).get() * detinv;
 				}
 			}
 		}

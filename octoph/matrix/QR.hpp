@@ -61,8 +61,9 @@ public:
 template<class A, class U, class V, std::size_t I = 1>
 auto QR_helper(const A& a0, U& u0, V& v)  {
 	constexpr auto N = A::nrow;
+	static_assert(I>=1);
 	if constexpr (I < N) {
-		const auto u = column<A, I - 1>(u0);
+		const auto u = column<U, I - 1>(u0);
 		const auto a = detail::block_columns_left_type<A, I>(a0);
 		const auto Ta = transpose(a);
 		const auto Tau = product(Ta, u);
@@ -77,7 +78,11 @@ auto QR_helper(const A& a0, U& u0, V& v)  {
 		v(I - 1, I - 1) = Tuu(0, 0);
 		return QR_helper<A, decltype(newU), V, I + 1>(a0, newU, v);
 	} else {
-		return u0;
+		const auto u = column<U, I - 1>(u0);
+		const auto Tu = transpose(u);
+		const auto Tuu = copy(product(Tu, u));
+		v(I - 1, I - 1) = Tuu(0, 0);
+		return copy(u0);
 	}
 }
 }
@@ -86,11 +91,16 @@ template<class A>
 auto QR_decomposition(const A& a) {
 	using type = typename A::value_type;
 	constexpr auto N = A::nrow;
-	matrix<type, N, N, mask_diagonal<N>> V;
-	auto U = copy(a);
-	detail::QR_helper<A, decltype(U), decltype(V)>(a, U, V);
-	auto Q = copy(product(U, V));
-	return Q;
+	matrix<type, N, N> V;
+	for( int i = 0; i < N; i++) {
+		for( int j = 0; j < N; j++) {
+			V(i,j) = 0.0;
+		}
+	}
+	auto U = a;
+	auto newU = detail::QR_helper<A, decltype(U), decltype(V)>(a, U, V);
+	print(newU);
+	return copy(product(U,inverse(V)));
 }
 
 }

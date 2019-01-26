@@ -13,13 +13,10 @@
 
 #include "matrix/mask.hpp"
 
-
 namespace linear {
-
 
 template<class A, std::size_t I, std::size_t J>
 struct init_indexes;
-
 
 template<class T, std::size_t N, std::size_t M, class MASK = mask_all_true<N, M> >
 struct matrix {
@@ -40,15 +37,15 @@ private:
 
 	template<class A, std::size_t I, std::size_t J>
 	struct copy {
-		inline copy(matrix& me, const A& other) {
-			constexpr bool this_on = !zero<I, J>();
-			const bool other_on = !other.template zero<I, J>();
-			static_assert(!(!this_on && other_on), "linear::copy - array shape mismatch");
-			constexpr bool last = (I == 0) && (J == 0);
-			constexpr std::size_t NI = (I == 0) ? 0 : ((J == 0) ? (I - 1) : I);
-			constexpr std::size_t NJ = (J == 0) ? (M - 1) : J - 1;
-			if constexpr (!last) {
-				copy<A, NI, NJ> f(me, other);
+		constexpr copy(matrix& me, const A& other)  {
+			if constexpr (I != 0) {
+				if constexpr (J != 0) {
+					 copy<A, I, J - 1>(me, other);
+				} else {
+					copy<A, I - 1, M - 1>(me, other);
+				}
+			} else if constexpr (J != 0) {
+				copy<A, I, J - 1>(me, other);
 			}
 			me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
 		}
@@ -84,13 +81,22 @@ public:
 		copy<A, N - 1, M - 1> f(*this, other);
 	}
 
-	matrix& operator=(const matrix& other) {
+	template<class O>
+	matrix& operator=(const O& other) {
 		copy<matrix, N - 1, M - 1> f(*this, other);
 		return *this;
 	}
 
 	template<std::size_t I, std::size_t J>
-	inline auto get() const {
+	inline T& get() {
+		static_assert(I < N);
+		static_assert(J < M);
+		static_assert (!zero<I, J>());
+		return a_[mask_.template index<I, J>()];
+	}
+
+	template<std::size_t I, std::size_t J>
+	inline T get() const {
 		static_assert(I < N);
 		static_assert(J < M);
 		if constexpr (zero<I, J>()) {
@@ -129,7 +135,6 @@ auto copy(const T& A) {
 template<class T, std::size_t N, std::size_t M, class MASK>
 std::array<std::array<std::size_t, M>, N> matrix<T, N, M, MASK>::indexes;
 
-
 template<class A, std::size_t I, std::size_t J>
 struct init_indexes {
 	init_indexes(const A& a) {
@@ -153,6 +158,18 @@ struct init_indexes<A, 0, 0> {
 	}
 };
 
+template<class A>
+void print(const A& a) {
+	constexpr auto N = A::nrow;
+	constexpr auto M = A::ncol;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < M; j++) {
+			printf("%16e", a(i, j));
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
 
 }
 #endif /* OCTOPH_MATRIX_MATRIX_HPP_ */

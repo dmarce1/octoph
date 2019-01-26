@@ -40,7 +40,6 @@ public:
 	using next_sequence = integer_sequence<T,Rest...>;
 	static constexpr std::size_t N = 1 + sizeof...(Rest);
 
-	using indexes = typename integer_sequence_cat<T,integer_sequence<T,First>,typename integer_sequence_inc<T, typename next_sequence::indexes,First>::type>::type;
 	template<std::size_t I>
 	static constexpr T get() {
 		static_assert(I < N);
@@ -53,7 +52,6 @@ template<class T, T Last>
 class integer_sequence<T, Last> : public std::integer_sequence<T, Last> {
 public:
 	using type = T;
-	using indexes = integer_sequence<T,Last>;
 	static constexpr std::size_t N = 1;
 
 	template<std::size_t I>
@@ -62,6 +60,40 @@ public:
 		return Last;
 	}
 };
+
+
+template<class A, std::size_t I, std::size_t J>
+constexpr std::size_t index_plus_one() {
+	constexpr auto N = A::nrow;
+	constexpr auto M = A::ncol;
+	static_assert(I<A::nrow);
+	static_assert(J<A::ncol);
+	if constexpr (N == 1) {
+		if constexpr (J == 0) {
+			return int(A::template get<0, 0>());
+		} else {
+			return int(A::template get<0, J>()) + int(index_plus_one<A, 0, J - 1>());
+		}
+	} else if constexpr (M == 1) {
+		if constexpr (I == 0) {
+			return int(A::template get<I, 0>());
+		} else {
+			return int(A::template get<I, 0>()) + int(index_plus_one<A, I - 1, 0>());
+		}
+	} else if constexpr (I > 0) {
+		if constexpr (J > 0) {
+			return int(A::template get<I, J>()) + int(index_plus_one<A, I, J - 1>());
+		} else {
+			return int(A::template get<I, J>()) + int(index_plus_one<A, I - 1, M - 1>());
+		}
+	} else {
+		if constexpr (J > 0) {
+			return int(A::template get<I, J>()) + int(index_plus_one<A, I, J - 1>());
+		} else {
+			return int(A::template get<I, J>());
+		}
+	}
+}
 
 template<class First, class ...Rest>
 struct mask {
@@ -83,11 +115,12 @@ struct mask {
 	static constexpr std::size_t index() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return type::indexes::template get<I * M + J>() - 1;
+		return index_plus_one<mask,I,J>();
 	}
 
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
 };
+
 
 template<class Last>
 class mask<Last> {
@@ -109,7 +142,7 @@ public:
 	static constexpr std::size_t index() {
 		static_assert(I==0);
 		static_assert(J<M);
-		return type::indexes::template get<I * M + J>() - 1;
+		return index_plus_one<mask,I,J>();
 	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
 
@@ -136,6 +169,7 @@ public:
 		static_assert(J<M);
 		return I * M + J;
 	}
+
 
 };
 
@@ -164,53 +198,29 @@ public:
 
 template<class A>
 class mask_derived {
+
 public:
 
 	static constexpr bool is_mask = true;
 	using matrix_type = typename std::enable_if<A::is_matrix,A>::type;
-	static constexpr std::size_t N = A::nrow;
-	static constexpr std::size_t M = A::ncol;
+	static constexpr std::size_t nrow = A::nrow;
+	static constexpr std::size_t ncol = A::ncol;
 
-	template<std::size_t I, std::size_t J, class T>
-	struct index_helper {
-		constexpr index_helper() {
-		}
-		using prev = index_helper<I-1,J,int>;
-		static constexpr std::size_t index = prev::index + (A::template zero<I, J>() ? 0 : 1);
-	};
-
-	template<std::size_t J, class T>
-	struct index_helper<0, J, T> {
-		constexpr index_helper() {
-		}
-		using prev = index_helper<N - 1,J-1,int>;
-		static constexpr std::size_t index = prev::index + (A::template zero<0, J>() ? 0 : 1);
-	};
-
-	template<class T>
-	struct index_helper<0, 0, T> {
-		constexpr index_helper() {
-		}
-		static constexpr std::size_t index = A::template zero<0, 0>() ? 0 : 1;
-	};
-
-	static constexpr std::size_t size = N * M;
+	static constexpr std::size_t size = index_plus_one<mask_derived, nrow - 1, ncol - 1>();
 
 	template<std::size_t I, std::size_t J>
 	static constexpr bool get() {
-		static_assert(I<N);
-		static_assert(J<M);
+		static_assert(I<nrow);
+		static_assert(J<ncol);
 		return !(matrix_type::template zero<I, J>());
 	}
-
 	template<std::size_t I, std::size_t J>
 	static constexpr std::size_t index() {
-		static_assert(I<N);
-		static_assert(J<M);
-		return index_helper<I, J, int>::index - 1;
+		return index_plus_one<mask_derived, I, J>() - 1;
 	}
 
-};
+}
+;
 
 }
 

@@ -16,6 +16,7 @@ namespace linear {
 
 template<class A, std::size_t L>
 struct column_type {
+	static_assert(L<A::ncol);
 	static constexpr bool is_matrix = true;
 	using value_type = typename std::enable_if<A::is_matrix,typename A::value_type>::type;
 	static_assert(L<A::ncol);

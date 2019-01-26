@@ -10,38 +10,21 @@
 using real = math::real;
 #include <matrix/QR.hpp>
 
-
-
-
-template<std::size_t N>
-class sorted {
-	template< class...Args, class S = std::make_index_sequence<sizeof...(Args)>>
-	void func(std::tuple<Args...>& t, S& s ) {
-
-	}
-
-};
-
 #ifdef TEST_MATRIX
 
 int main() {
-	std::array<std::array<real,2>,2> a = { { {1,0}, {0,1}}};
+	std::array<std::array<double,2>,2> b_ = {{{1,1},{1,1}}};
+	auto b = linear::matrix<double,2,2>(b_);
+	auto c = linear::column<decltype(b),0>(b);
 
-	using mask = linear::mask<linear::integer_sequence<std::size_t,1,1>,linear::integer_sequence<std::size_t,1,1>>;
-	auto A = linear::matrix<real,2,2,mask>(a);
-//auto A = linear::matrix<real,3,3>(a);
+	printf( "Hello\n");
+	std::array<std::array<double,3>,3> a = {{ {12,-51,  4},
+			                                   {6,167,-68},
+											  {-4, 24,-41}}};
+	linear::matrix<double,3,3> A(a);
+	print(A);
 
-	auto B = linear::inverse(A);
-	auto C = linear::copy(B);
-
-	math::real::local_counter counter;
-	counter.start();
-	B = linear::inverse(A);
-//	C = linear::copy(B);
-	counter.stop();
-	printf( "%i\n", int(counter.read()));
-	decltype(A) b, c;
-	linear::QR_decomposition(A);
+	print(linear::QR_decomposition(A));
 	return 0;
 }
 

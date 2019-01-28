@@ -66,10 +66,10 @@ public:
 			return value_type(0);
 		} else {
 			if (I == 0) {
-				if constexpr (si * sj == 1) {
-					return dets_[I] * detinv;
+				if constexpr (sj == 1) {
+					return dets_[J] * detinv;
 				} else {
-					return -dets_[I] * detinv;
+					return -dets_[J] * detinv;
 				}
 			} else {
 				if constexpr (si * sj == 1) {
@@ -86,7 +86,8 @@ public:
 		static_assert(I<nrow);
 		static_assert(J<ncol);
 		using det_type = decltype(determinant(comatrix<A, I, J>(a_)));
-		return bool(det_type::zero() || A::template zero<I, J>());
+		const auto rc = bool(det_type::zero() || A::template zero<I, J>());
+		return rc;
 	}
 
 	template<class AA>

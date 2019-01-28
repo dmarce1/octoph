@@ -64,17 +64,13 @@ public:
 
 template<class A, std::size_t I, std::size_t J>
 constexpr std::size_t index_plus_one() {
-	constexpr auto N = A::nrow;
-	constexpr auto M = A::ncol;
-	static_assert(I<A::nrow);
-	static_assert(J<A::ncol);
-	if constexpr (N == 1) {
+	if constexpr (A::N == 1) {
 		if constexpr (J == 0) {
 			return int(A::template get<0, 0>());
 		} else {
 			return int(A::template get<0, J>()) + int(index_plus_one<A, 0, J - 1>());
 		}
-	} else if constexpr (M == 1) {
+	} else if constexpr (A::M == 1) {
 		if constexpr (I == 0) {
 			return int(A::template get<I, 0>());
 		} else {
@@ -84,7 +80,7 @@ constexpr std::size_t index_plus_one() {
 		if constexpr (J > 0) {
 			return int(A::template get<I, J>()) + int(index_plus_one<A, I, J - 1>());
 		} else {
-			return int(A::template get<I, J>()) + int(index_plus_one<A, I - 1, M - 1>());
+			return int(A::template get<I, J>()) + int(index_plus_one<A, I - 1, A::M - 1>());
 		}
 	} else {
 		if constexpr (J > 0) {
@@ -203,15 +199,15 @@ public:
 
 	static constexpr bool is_mask = true;
 	using matrix_type = typename std::enable_if<A::is_matrix,A>::type;
-	static constexpr std::size_t nrow = A::nrow;
-	static constexpr std::size_t ncol = A::ncol;
+	static constexpr std::size_t N = A::nrow;
+	static constexpr std::size_t M = A::ncol;
 
-	static constexpr std::size_t size = index_plus_one<mask_derived, nrow - 1, ncol - 1>();
+	static constexpr std::size_t size = index_plus_one<mask_derived, N - 1, M - 1>();
 
 	template<std::size_t I, std::size_t J>
 	static constexpr bool get() {
-		static_assert(I<nrow);
-		static_assert(J<ncol);
+		static_assert(I<N);
+		static_assert(J<M);
 		return !(matrix_type::template zero<I, J>());
 	}
 	template<std::size_t I, std::size_t J>

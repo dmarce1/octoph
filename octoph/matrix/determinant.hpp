@@ -24,6 +24,7 @@ class determinant_type {
 	static constexpr std::size_t nrow = N;
 	static constexpr std::size_t ncol = N;
 	static_assert(N==A::ncol && N==A::nrow);
+	static_assert(N > 0);
 	const A& a_;
 
 private:
@@ -56,7 +57,9 @@ private:
 
 	template<std::size_t I>
 	static constexpr bool determinant_is_zero() {
-		if constexpr (col_zero<I, N - 1>()) {
+		if constexpr (N == 1) {
+			return A::template zero<0,0>();
+		} else if constexpr (col_zero<I, N - 1>()) {
 			return true;
 		} else if constexpr (row_zero<I, N - 1>()) {
 			return true;
@@ -69,34 +72,39 @@ private:
 public:
 
 	static constexpr bool zero() {
-		return determinant_is_zero<nrow - 1>();
+		const bool rc = determinant_is_zero<nrow - 1>();
+		return rc;
 	}
 
 	template<std::size_t M, std::size_t I>
 	auto compute() const {
-		constexpr int sign = ((I % 2) == 0) ? 1 : -1;
-		constexpr std::size_t IM1 = I - 1;
-		auto b = comatrix<A, 0, I>(a_);
-		auto detB = determinant(b);
-		if constexpr (I == 0) {
-			if constexpr (M == 0) {
-				return a_.template get<0, 0>();
-			} else {
-				if constexpr (!A::template zero<0, 0>() && !detB.zero()) {
-					return detB.get() * a_.template get<0, 0>();
-				} else {
-					return value_type(0);
-				}
-			}
+		if constexpr (N == 1) {
+			return a_.template get<0, 0>();
 		} else {
-			if constexpr (!A::template zero<0, I>() && !detB.zero()) {
-				if constexpr (sign == 1) {
-					return compute<M, IM1>() + detB.get() * a_.template get<0, I>();
+			constexpr int sign = ((I % 2) == 0) ? 1 : -1;
+			constexpr std::size_t IM1 = I - 1;
+			auto b = comatrix<A, 0, I>(a_);
+			auto detB = determinant(b);
+			if constexpr (I == 0) {
+				if constexpr (M == 0) {
+					return a_.template get<0, 0>();
 				} else {
-					return compute<M, IM1>() - detB.get() * a_.template get<0, I>();
+					if constexpr (!A::template zero<0, 0>() && !detB.zero()) {
+						return detB.get() * a_.template get<0, 0>();
+					} else {
+						return value_type(0);
+					}
 				}
 			} else {
-				return compute<M, IM1>();
+				if constexpr (!A::template zero<0, I>() && !detB.zero()) {
+					if constexpr (sign == 1) {
+						return compute<M, IM1>() + detB.get() * a_.template get<0, I>();
+					} else {
+						return compute<M, IM1>() - detB.get() * a_.template get<0, I>();
+					}
+				} else {
+					return compute<M, IM1>();
+				}
 			}
 		}
 	}
@@ -113,31 +121,6 @@ public:
 		} else {
 			return value_type(0);
 		}
-	}
-	template<class A1>
-	friend determinant_type<A1, A1::ncol> determinant(const A1& a);
-};
-
-template<class A>
-class determinant_type<A, 0> {
-	static constexpr std::size_t nrow = 0;
-	static constexpr std::size_t ncol = 0;
-	static_assert(0==A::ncol && 0==A::nrow);
-	using value_type = typename A::value_type;
-private:
-
-public:
-
-	static constexpr bool zero() {
-		return false;
-	}
-private:
-	determinant_type(const A& a) {
-	}
-
-public:
-	inline constexpr value_type get() const {
-		return value_type(1);
 	}
 	template<class A1>
 	friend determinant_type<A1, A1::ncol> determinant(const A1& a);

@@ -16,8 +16,6 @@
 namespace linear {
 namespace detail {
 
-
-
 template<class A, std::size_t L>
 struct block_columns_left_type {
 	static constexpr bool is_matrix = true;
@@ -40,7 +38,7 @@ public:
 		static_assert(I<nrow);
 		if constexpr (J < L) {
 			return value_type(0);
-		} else if( A::template zero<I, L>()) {
+		} else if (A::template zero<I, L>()) {
 			return 0;
 		} else {
 			return a_.template get<I, J>();
@@ -61,7 +59,7 @@ public:
 };
 
 template<class A, class U, class V, std::size_t I = 1>
-auto QR_helper(const A& a0, U& u0, V& v)  {
+auto QR_helper(const A& a0, U& u0, V& v) {
 	constexpr auto N = A::nrow;
 	static_assert(I>=1);
 	if constexpr (I < N) {
@@ -94,14 +92,17 @@ auto QR_decomposition(const A& a) {
 	using type = typename A::value_type;
 	constexpr auto N = A::nrow;
 	matrix<type, N, N> V;
-	for( int i = 0; i < N; i++) {
-		for( int j = 0; j < N; j++) {
-			V(i,j) = 0.0;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			V(i, j) = 0.0;
 		}
 	}
 	auto U = a;
 	auto newU = detail::QR_helper<A, decltype(U), decltype(V)>(a, U, V);
-	return copy(newU);
+	for (int i = 0; i < N; i++) {
+		V(i, i) = std::sqrt(V(i, i));
+	}
+	return copy(product(newU, inverse(V)));
 }
 
 }

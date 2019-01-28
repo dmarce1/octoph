@@ -15,16 +15,17 @@ using real = math::real;
 int main() {
 	using mask = linear::mask<linear::integer_sequence<int,1,0,0>,linear::integer_sequence<int,0,1,0>,linear::integer_sequence<int,0,0,1>>;
 	auto A = linear::matrix<double,2,3>(std::array<std::array<double,3>,2>( { { {1,2,3}, {4,5,6}}}));
-	auto B = linear::matrix<double,3,2>(std::array<std::array<double,2>,3>( { { {1,8}, {9,10}, {11,12}}}));
-	auto C = linear::matrix<double,3,3>(std::array<std::array<double,3>,3>( { { {12,-51,4},
-		                                                                             {6,167,-68},
-																					 {-4,24,-41}}}));
+	auto C = linear::matrix<double,3,3>(std::array<std::array<double,3>,3>( { { {1,8,-1}, {9,10,2}, {11,12,3}}}));
 
 //	print(linear::copy(linear::product(A,B)));
 
-//	print(C);
-	print(linear::copy(C));
-	print(linear::copy(linear::QR_decomposition(C)));
+	print(C);
+	for( int d = 0; d < 200; d++) {
+		auto Q = linear::QR_decomposition(C);
+		auto Qn1 = linear::transpose(Q);
+		C = copy(product(Qn1,product(C,Q)));
+		print(linear::copy(C));
+	}
 	return 0;
 }
 

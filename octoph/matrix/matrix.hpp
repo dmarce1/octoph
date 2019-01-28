@@ -37,29 +37,35 @@ private:
 
 	template<class A, std::size_t I, std::size_t J>
 	struct copy {
-		constexpr copy(matrix& me, const A& other)  {
+		constexpr copy(matrix& me, const A& other) {
+			if (!other.template zero<I, J>()) {
+				//		printf("M:%i %i %i\n", I, J, mask_.template index<I, J>());
+				me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
+			}
 			if constexpr (I != 0) {
 				if constexpr (J != 0) {
-					 copy<A, I, J - 1>(me, other);
+					copy<A, I, J - 1>(me, other);
 				} else {
 					copy<A, I - 1, M - 1>(me, other);
 				}
-			} else if constexpr (J != 0) {
-				copy<A, I, J - 1>(me, other);
+			} else {
+				if constexpr (J != 0) {
+					copy<A, I, J - 1>(me, other);
+				}
 			}
-			me.a_[mask_.template index<I, J>()] = other.template get<I, J>();
 		}
 	};
 
 	template<std::size_t I1, std::size_t J1>
 	void initialize(const std::array<std::array<value_type, M>, N>& init) {
-		constexpr std::size_t J2 = (J1 == 0) ? 0 : ((I1 == 0) ? (J1 - 1) : J1);
-		constexpr std::size_t I2 = (I1 == 0) ? (N - 1) : (I1 - 1);
-		if constexpr (!((J1 == 0) && (I1 == 0))) {
-			initialize<I2, J2>(init);
-		}
-		if constexpr (mask_.template get<I1, J1>()) {
-			get<I1, J1>() = init[I1][J1];
+		get<I1, J1>() = init[I1][J1];
+		if constexpr (I1 == 0 && J1 == 0) {
+		} else if constexpr (I1 == 0) {
+			initialize<I1, J1 - 1>(init);
+		} else if constexpr (J1 == 0) {
+			initialize<I1 - 1, M - 1>(init);
+		} else {
+			initialize<I1, J1 - 1>(init);
 		}
 	}
 
@@ -91,7 +97,6 @@ public:
 	inline T& get() {
 		static_assert(I < N);
 		static_assert(J < M);
-		static_assert (!zero<I, J>());
 		return a_[mask_.template index<I, J>()];
 	}
 
@@ -114,10 +119,12 @@ public:
 	}
 
 	T operator()(std::size_t i, std::size_t j) const {
+		//	printf( "%i\n", index(i,j));
 		return a_[index(i, j)];
 	}
 
 	T& operator()(std::size_t i, std::size_t j) {
+//		printf( "%i\n", index(i,j));
 		return a_[index(i, j)];
 	}
 
@@ -158,17 +165,29 @@ struct init_indexes<A, 0, 0> {
 	}
 };
 
-template<class A>
+template<class A, std::size_t I = 0, std::size_t J = 0>
 void print(const A& a) {
 	constexpr auto N = A::nrow;
 	constexpr auto M = A::ncol;
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < M; j++) {
-			printf("%16e", a(i, j));
-		}
-		printf("\n");
+	if constexpr (!A::template zero<I, J>()) {
+		printf("%16e ", a(I, J));
+	} else {
+		printf("%16e ", double(0));
 	}
-	printf("\n");
+	if constexpr (J == M - 1) {
+		printf("\n");
+		if constexpr (I == N - 1) {
+			printf("\n");
+		}
+	}
+	if constexpr (J != M - 1) {
+		print<A, I, J + 1>(a);
+	} else {
+		if constexpr (I != N - 1) {
+			print<A, I + 1, 0>(a);
+		}
+	}
+
 }
 
 }

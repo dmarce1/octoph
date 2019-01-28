@@ -32,24 +32,26 @@ private:
 			dets_[I] = value_type(0);
 		} else {
 			dets_[I] = det.get();
-			constexpr int si = ((I % 2) == 0) ? 1 : -1;
-			if constexpr (si == 1) {
-				detinv += dets_[I];
-			} else {
-				detinv -= dets_[I];
+			if constexpr (!zero<0, I>()) {
+				constexpr int si = ((I % 2) == 0) ? 1 : -1;
+				if constexpr (si == 1) {
+					detinv += a_.template get<0, I>() * dets_[I];
+				} else {
+					detinv -= a_.template get<0, I>() * dets_[I];
+				}
 			}
 		}
-		if constexpr( I > 0 ) {
-			fill_dets<I-1>();
+		if constexpr (I > 0) {
+			fill_dets<I - 1>();
 		}
 	}
-
 
 	template<class A1, std::size_t I>
 	friend class fill_dets;
 
 	inverse_type(const A& a) :
 			a_(a), detinv(value_type(0)) {
+		detinv = 0;
 		fill_dets<nrow - 1>();
 		detinv = value_type(1) / detinv;
 	}

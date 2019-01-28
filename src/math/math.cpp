@@ -11,7 +11,7 @@ thread_local std::atomic<std::uint64_t> integer::tops_(0);
 }
 using real = math::real;
 #include <stdio.h>
-
+/*
 #define BINARY_OPERATOR(op)                   \
 template<class A, class B>                    \
 auto operator op (const A& a, const B& b) {   \
@@ -78,13 +78,13 @@ UNARY_OPERATOR(-);
 UNARY_OPERATOR(+);
 UNARY_OPERATOR(!);
 UNARY_OPERATOR(~);
-
+*/
 
 #ifdef TEST_MATH
 #include <array>
 int main() {
-	std::array<double,4> A, B;
-	auto test = A * (A + B);
+//	std::array<double,4> A, B;
+//	auto test = A * (A + B);
 
 }
 #endif

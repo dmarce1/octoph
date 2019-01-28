@@ -61,32 +61,53 @@ public:
 	}
 };
 
-
-template<class A, std::size_t I, std::size_t J>
-constexpr std::size_t index_plus_one() {
+template<class A, std::size_t I, std::size_t J, std::size_t last = 0>
+constexpr std::size_t find_index() {
+	constexpr auto on = A::template get<I, J>() ? 1 : 0;
 	if constexpr (A::N == 1) {
 		if constexpr (J == 0) {
-			return int(A::template get<0, 0>());
+			return 0;
 		} else {
-			return int(A::template get<0, J>()) + int(index_plus_one<A, 0, J - 1>());
+			const auto i = last + find_index<A, 0, J - 1,on>();
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		}
 	} else if constexpr (A::M == 1) {
 		if constexpr (I == 0) {
-			return int(A::template get<I, 0>());
+			constexpr auto i = last;
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		} else {
-			return int(A::template get<I, 0>()) + int(index_plus_one<A, I - 1, 0>());
+			const auto i = last + find_index<A, I - 1, 0,on>();
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		}
 	} else if constexpr (I > 0) {
 		if constexpr (J > 0) {
-			return int(A::template get<I, J>()) + int(index_plus_one<A, I, J - 1>());
+			const auto i = last + find_index<A, I, J - 1,on>();
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		} else {
-			return int(A::template get<I, J>()) + int(index_plus_one<A, I - 1, A::M - 1>());
+			const auto i = last + find_index<A, I - 1, A::M - 1,on>();
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		}
 	} else {
 		if constexpr (J > 0) {
-			return int(A::template get<I, J>()) + int(index_plus_one<A, I, J - 1>());
+			const auto i = last + find_index<A, I, J - 1,on>();
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		} else {
-			return int(A::template get<I, J>());
+			const auto i = last;
+			static_assert(i>=0);
+			static_assert(i < A::N * A::M);
+			return i;
 		}
 	}
 }
@@ -111,12 +132,11 @@ struct mask {
 	static constexpr std::size_t index() {
 		static_assert(I<N);
 		static_assert(J<M);
-		return index_plus_one<mask,I,J>();
+		return find_index<mask, I, J>();
 	}
 
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
 };
-
 
 template<class Last>
 class mask<Last> {
@@ -138,7 +158,7 @@ public:
 	static constexpr std::size_t index() {
 		static_assert(I==0);
 		static_assert(J<M);
-		return index_plus_one<mask,I,J>();
+		return find_index<mask, I, J>();
 	}
 	static constexpr std::size_t size = index<N - 1, M - 1>() + 1;
 
@@ -165,7 +185,6 @@ public:
 		static_assert(J<M);
 		return I * M + J;
 	}
-
 
 };
 
@@ -202,7 +221,7 @@ public:
 	static constexpr std::size_t N = A::nrow;
 	static constexpr std::size_t M = A::ncol;
 
-	static constexpr std::size_t size = index_plus_one<mask_derived, N - 1, M - 1>();
+	static constexpr std::size_t size = find_index<mask_derived, N - 1, M - 1>() + 1;
 
 	template<std::size_t I, std::size_t J>
 	static constexpr bool get() {
@@ -212,7 +231,7 @@ public:
 	}
 	template<std::size_t I, std::size_t J>
 	static constexpr std::size_t index() {
-		return index_plus_one<mask_derived, I, J>() - 1;
+		return find_index<mask_derived, I, J>();
 	}
 
 }

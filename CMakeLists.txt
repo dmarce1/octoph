@@ -58,7 +58,7 @@ add_hpx_executable(
 
 
 
-set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -std=c++17 -march=native)
+set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -std=c++17 -march=native -D_GLIBCXX_DEBUG)
 
 
 add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )

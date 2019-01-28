@@ -16,16 +16,17 @@ int main() {
 	using mask = linear::mask<linear::integer_sequence<int,1,0,0>,linear::integer_sequence<int,0,1,0>,linear::integer_sequence<int,0,0,1>>;
 	auto A = linear::matrix<double,2,3>(std::array<std::array<double,3>,2>( { { {1,2,3}, {4,5,6}}}));
 	auto B = linear::matrix<double,3,2>(std::array<std::array<double,2>,3>( { { {1,8}, {9,10}, {11,12}}}));
-	auto C = linear::matrix<double,3,3,mask>(std::array<std::array<double,3>,3>( { { {2,0,0},
-		                                                                             {0,1,0},
-																					 {0,0,1}}}));
+	auto C = linear::matrix<double,3,3>(std::array<std::array<double,3>,3>( { { {12,-51,4},
+		                                                                             {6,167,-68},
+																					 {-4,24,-41}}}));
 
 //	print(linear::copy(linear::product(A,B)));
 
-	print(C);
+//	print(C);
 	print(linear::copy(C));
-	print(linear::copy(linear::inverse(C)));
+	print(linear::copy(linear::QR_decomposition(C)));
 	return 0;
 }
+
 
 #endif

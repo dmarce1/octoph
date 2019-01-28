@@ -40,6 +40,8 @@ public:
 		static_assert(I<nrow);
 		if constexpr (J < L) {
 			return value_type(0);
+		} else if( A::template zero<I, L>()) {
+			return 0;
 		} else {
 			return a_.template get<I, J>();
 		}
@@ -99,8 +101,7 @@ auto QR_decomposition(const A& a) {
 	}
 	auto U = a;
 	auto newU = detail::QR_helper<A, decltype(U), decltype(V)>(a, U, V);
-	print(newU);
-	return copy(product(U,inverse(V)));
+	return copy(newU);
 }
 
 }

@@ -227,6 +227,8 @@ public:
 	static constexpr bool get() {
 		static_assert(I<N);
 		static_assert(J<M);
+		static_assert(I>=0);
+		static_assert(J>=0);
 		return !(matrix_type::template zero<I, J>());
 	}
 	template<std::size_t I, std::size_t J>

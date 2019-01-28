@@ -12,7 +12,7 @@
 
 namespace linear {
 
-template<class A>
+template<class A, std::size_t N = A::nrow>
 struct inverse_type {
 	static constexpr bool is_matrix = true;
 	using value_type = typename A::value_type;
@@ -90,6 +90,37 @@ public:
 		using det_type = decltype(determinant(comatrix<A, I, J>(a_)));
 		const auto rc = bool(det_type::zero() || A::template zero<I, J>());
 		return rc;
+	}
+
+	template<class AA>
+	friend inverse_type<AA> inverse(const AA& a);
+}
+;
+
+template<class A>
+struct inverse_type<A,1> {
+	static constexpr bool is_matrix = true;
+	using value_type = typename A::value_type;
+	static constexpr std::size_t nrow = A::ncol;
+	static constexpr std::size_t ncol = A::nrow;
+
+private:
+	A a_;
+	std::array<value_type, nrow> dets_;
+	value_type detinv;
+
+	inverse_type(const A& a) :
+			a_(a), detinv(value_type(0)) {
+	}
+public:
+	template<std::size_t J, std::size_t I>
+	auto get() const {
+		return 1.0 / a_.template get<0,0>();
+	}
+
+	template<std::size_t J, std::size_t I>
+	static constexpr bool zero() {
+		return false;
 	}
 
 	template<class AA>

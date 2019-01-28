@@ -40,22 +40,14 @@ public:
 		}
 	}
 
-//
-//	template<std::size_t I, std::size_t J>
-//	static constexpr std::size_t op_count() {
-//		static_assert((I < nrow)  && (J < ncol));
-//		if constexpr (A::template zero<I, J>() || B::template zero<I, J>()) {
-//			return 0;
-//		} else {
-//			return A::template op_count<I,J>() + B::template op_count<I,J>() + 1;
-//		}
-//	}
-
 	template<std::size_t I, std::size_t J>
 	static constexpr bool zero() {
 		static_assert(I<nrow);
 		static_assert(J<ncol);
-		return A::template zero<I, J>() && B::template zero<I, J>();
+		constexpr bool first = A::template zero<I, J>();
+		constexpr bool second = A::template zero<I, J>();
+		return first && second;
+
 	}
 
 	template<class AA, class BB>

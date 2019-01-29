@@ -13,6 +13,14 @@
 #include <cstdint>
 #include <cmath>
 
+template<class T>
+auto minmod(const T& a, const T& b) {
+	return (std::copysign(0.5, a) + std::copysign(0.5, b)) * (std::min(std::abs(a), std::abs(b)));
+}
+
+
+#include "math/polynomial.hpp"
+
 #define NUMBER_BINARY_OP( type, op )                        \
 	inline type operator op (const type& other) const {     \
 		gops_++;                                            \

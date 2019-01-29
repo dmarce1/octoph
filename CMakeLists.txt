@@ -43,6 +43,7 @@ set(header_files
     octoph/cell/cell_server.hpp
  	${matrix_headers}
     octoph/math/math.hpp
+    octoph/math/polynomial.hpp
 )
 
 add_hpx_executable(
@@ -69,7 +70,7 @@ add_executable(            legendre_test src/basis/legendre.cpp octoph/basis/leg
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
 
-add_executable            (math_test src/math/math.cpp octoph/math/math.hpp  )
+add_executable            (math_test src/math/math.cpp octoph/math/math.hpp     octoph/math/polynomial.hpp)
 target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 

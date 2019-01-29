@@ -11,8 +11,62 @@ thread_local std::atomic<std::uint64_t> integer::tops_(0);
 }
 using real = math::real;
 #include <stdio.h>
-/*
-#define BINARY_OPERATOR(op)                   \
+
+#include <array>
+
+template<class T>
+constexpr auto update_index(T& j, auto k) {
+	if (j > k) {
+		return j - 1;
+	} else if (j < k) {
+		return j;
+	}
+}
+
+template<class T>
+constexpr auto equal_to(T& j, auto k) {
+	return j == k;
+}
+
+template<class...T>
+constexpr auto one_true(T...b ) {
+	return (b || ... );
+}
+
+template<class I, class J, class ...Rest>
+constexpr int levita_cita(I i, J j, Rest ...args) {
+	if constexpr (sizeof...(Rest) == 0) {
+		if (i == j) {
+			return 0;
+		} else if (i == 0) {
+			return +1;
+		} else {
+			return -1;
+		}
+	} else if( one_true( equal_to(args,i)...) ) {
+		return 0;
+	} else {
+		return levita_cita(update_index(j, i), update_index(args,i)...);
+	}
+}
+
+#ifdef TEST_MATH
+#include <array>
+int main() {
+
+	for( int i = 0; i < 3; i++) {
+		for( int j = 0; j < 3; j++) {
+			for( int k = 0; k < 3; k++) {
+				printf( "%i %i %i | %i\n", i, j, k, levita_cita(i,j,k));
+					}
+				}
+			}
+
+		}
+#endif
+
+		/*
+		 #define BINARY_OPERATOR(op)                   \
 template<class A, class B>                    \
 auto operator op (const A& a, const B& b) {   \
 	constexpr auto N = a.size();              \
@@ -36,7 +90,7 @@ auto operator op (const A& a, const B& b) {   \
 	return op_type(a, b);                     \
 }
 
-#define UNARY_OPERATOR(op)                    \
+		 #define UNARY_OPERATOR(op)                    \
 template<class A>                             \
 auto operator op (const A& a) {               \
 	constexpr auto N = a.size();              \
@@ -58,33 +112,24 @@ auto operator op (const A& a) {               \
 	return op_type(a);                        \
 }
 
-BINARY_OPERATOR(+);
-BINARY_OPERATOR(-);
-BINARY_OPERATOR(*);
-BINARY_OPERATOR(/);
-BINARY_OPERATOR(%);
-BINARY_OPERATOR(&);
-BINARY_OPERATOR(|);
-BINARY_OPERATOR(^);
-BINARY_OPERATOR(&&);
-BINARY_OPERATOR(||);
-BINARY_OPERATOR(>);
-BINARY_OPERATOR(>=);
-BINARY_OPERATOR(<);
-BINARY_OPERATOR(<=);
-BINARY_OPERATOR(==);
-BINARY_OPERATOR(!=);
-UNARY_OPERATOR(-);
-UNARY_OPERATOR(+);
-UNARY_OPERATOR(!);
-UNARY_OPERATOR(~);
-*/
-
-#ifdef TEST_MATH
-#include <array>
-int main() {
-//	std::array<double,4> A, B;
-//	auto test = A * (A + B);
-
-}
-#endif
+		 BINARY_OPERATOR(+);
+		 BINARY_OPERATOR(-);
+		 BINARY_OPERATOR(*);
+		 BINARY_OPERATOR(/);
+		 BINARY_OPERATOR(%);
+		 BINARY_OPERATOR(&);
+		 BINARY_OPERATOR(|);
+		 BINARY_OPERATOR(^);
+		 BINARY_OPERATOR(&&);
+		 BINARY_OPERATOR(||);
+		 BINARY_OPERATOR(>);
+		 BINARY_OPERATOR(>=);
+		 BINARY_OPERATOR(<);
+		 BINARY_OPERATOR(<=);
+		 BINARY_OPERATOR(==);
+		 BINARY_OPERATOR(!=);
+		 UNARY_OPERATOR(-);
+		 UNARY_OPERATOR(+);
+		 UNARY_OPERATOR(!);
+		 UNARY_OPERATOR(~);
+		 */

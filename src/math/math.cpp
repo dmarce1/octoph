@@ -18,7 +18,7 @@ template<class T>
 constexpr auto update_index(T& j, auto k) {
 	if (j > k) {
 		return j - 1;
-	} else if (j < k) {
+	} else {
 		return j;
 	}
 }
@@ -43,7 +43,7 @@ constexpr int levita_cita(I i, J j, Rest ...args) {
 		} else {
 			return -1;
 		}
-	} else if( one_true( equal_to(args,i)...) ) {
+	} else if( i == j || one_true( equal_to(args,i)...) ) {
 		return 0;
 	} else {
 		return levita_cita(update_index(j, i), update_index(args,i)...);

@@ -45,8 +45,10 @@ constexpr int levita_cita(I i, J j, Rest ...args) {
 		}
 	} else if( i == j || one_true( equal_to(args,i)...) ) {
 		return 0;
+	} else if ( i % 2 == 0){
+		return +levita_cita(update_index(j, i), update_index(args,i)...);
 	} else {
-		return levita_cita(update_index(j, i), update_index(args,i)...);
+		return -levita_cita(update_index(j, i), update_index(args,i)...);
 	}
 }
 

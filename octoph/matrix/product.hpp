@@ -25,7 +25,7 @@ private:
 	A a_;
 	B b_;
 
-	template<std::size_t N, std::size_t M, std::size_t ITER = L>
+	template<auto N, auto M, auto ITER = L>
 	auto execute(const A& a, const B& b) const {
 		static constexpr std::size_t I = L - ITER;
 		if constexpr (ITER == 0) {

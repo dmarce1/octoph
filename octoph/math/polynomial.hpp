@@ -20,6 +20,15 @@ public:
 			c_(c) {
 	}
 
+	T operator[](int i) const {
+		return c_[i];
+	}
+
+	const T& operator[](int i) {
+		return c_[i];
+	}
+
+
 	T operator()(const T& x0) const {
 		T x = T(1);
 		T f = c_[0];
@@ -73,13 +82,13 @@ public:
 				const auto dP = D(x[k]);
 				w[k] = -P * (dP - P * factor);
 				if (k > 0) {
-					if( w[k] < 0.0 ) {
-						w[k] = std::max(w[k], T(T(0.49999999)*(x[k-1] - x[k])));
+					if (w[k] < 0.0) {
+						w[k] = std::max(w[k], T(T(0.49999999) * (x[k - 1] - x[k])));
 					}
 				}
 				if (k < N - 2) {
-					if( w[k] > 0.0 ) {
-						w[k] =std::min(w[k], T(T(0.49999999)*(x[k+1] - x[k])));
+					if (w[k] > 0.0) {
+						w[k] = std::min(w[k], T(T(0.49999999) * (x[k + 1] - x[k])));
 					}
 				}
 			}
@@ -89,6 +98,7 @@ public:
 			}
 			printf("\n");
 		}
+		return x;
 	}
 
 };

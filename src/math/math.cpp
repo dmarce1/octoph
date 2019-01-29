@@ -15,7 +15,7 @@ using real = math::real;
 #include <array>
 
 template<class T>
-constexpr auto update_index(T& j, auto k) {
+constexpr auto update_index(T& j, T k) {
 	if (j > k) {
 		return j - 1;
 	} else {
@@ -24,7 +24,7 @@ constexpr auto update_index(T& j, auto k) {
 }
 
 template<class T>
-constexpr auto equal_to(T& j, auto k) {
+constexpr auto equal_to(T& j, T k) {
 	return j == k;
 }
 

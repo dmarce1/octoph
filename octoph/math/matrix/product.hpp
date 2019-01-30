@@ -7,8 +7,9 @@
 
 #ifndef OCTOPH_MATRIX_PRODUCT_HPP_
 #define OCTOPH_MATRIX_PRODUCT_HPP_
+namespace math {
 
-namespace linear {
+namespace matrix {
 
 template<class A, class B = A>
 struct product_type {
@@ -83,6 +84,8 @@ product_type<A, B> product(const A& a, const B& b) {
 	product_type<A, B> p(a, b);
 	return p;
 }
+}
+
 
 }
 

@@ -7,8 +7,9 @@
 
 #ifndef OCTOPH_MATRIX_TRANSPOSE_HPP_
 #define OCTOPH_MATRIX_TRANSPOSE_HPP_
+namespace math {
 
-namespace linear {
+namespace matrix {
 
 template<class A>
 struct transpose_type {
@@ -52,7 +53,7 @@ transpose_type<A> transpose(const A& a) {
 	transpose_type<A> p(a);
 	return p;
 }
-
+}
 }
 
 

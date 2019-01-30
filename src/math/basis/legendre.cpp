@@ -9,6 +9,7 @@
 
 #include <functional>
 
+namespace math {
 namespace basis {
 
 static real find_root(const std::function<real(real)>& f, real a, real c);
@@ -84,13 +85,14 @@ static real find_root(const std::function<real(real)>& f, real a, real c) {
 }
 
 }
+}
 
 #ifdef TEST_LEGENDRE
 
 #include <iostream>
 
 int main() {
-	using namespace basis;
+	using namespace math::basis;
 	printf( "Computing roots of first %i Legendre polynomials\n", PMAX);
 	std::vector<real> roots;
 	for( int n = 1; n < PMAX; n++) {

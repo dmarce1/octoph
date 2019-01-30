@@ -11,8 +11,9 @@
 
 
 
+namespace math {
 
-namespace linear {
+namespace matrix {
 
 template<class A, std::size_t L>
 struct column_type {
@@ -53,6 +54,7 @@ public:
 template<class A, std::size_t I>
 auto column(const A& a) {
 	return column_type<A, I>(a);
+}
 }
 }
 #endif /* OCTOPH_MATRIX_COLUMN_HPP_ */

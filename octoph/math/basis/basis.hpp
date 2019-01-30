@@ -12,9 +12,11 @@
 
 #include <valarray>
 
+namespace math {
 namespace basis {
 
 
+}
 }
 
 

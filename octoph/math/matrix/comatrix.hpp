@@ -7,8 +7,9 @@
 
 #ifndef OCTOPH_MATRIX_COMATRIX_HPP_
 #define OCTOPH_MATRIX_COMATRIX_HPP_
+namespace math {
 
-namespace linear {
+namespace matrix {
 template<class A, int N, int M>
 struct comatrix_type {
 	static constexpr bool is_matrix = true;
@@ -46,5 +47,5 @@ comatrix_type<A, I, J> comatrix(const A& a) {
 }
 
 }
-
+}
 #endif /* OCTOPH_MATRIX_COMATRIX_HPP_ */

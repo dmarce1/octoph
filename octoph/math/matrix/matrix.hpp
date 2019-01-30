@@ -12,8 +12,9 @@
 #include <functional>
 
 #include <octoph/math/matrix/mask.hpp>
+namespace math {
 
-namespace linear {
+namespace matrix {
 
 template<class A, std::size_t I, std::size_t J>
 struct init_indexes;
@@ -189,6 +190,6 @@ void print(const A& a) {
 	}
 
 }
-
+}
 }
 #endif /* OCTOPH_MATRIX_MATRIX_HPP_ */

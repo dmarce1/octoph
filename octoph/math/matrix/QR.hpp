@@ -13,7 +13,9 @@
 #include <octoph/math/matrix/neg.hpp>
 #include <octoph/math/matrix/column.hpp>
 
-namespace linear {
+namespace math {
+
+namespace matrix {
 namespace detail {
 
 template<class A, std::size_t L>
@@ -104,6 +106,6 @@ auto QR_decomposition(const A& a) {
 	}
 	return copy(product(newU, inverse(V)));
 }
-
+}
 }
 #endif /* OCTOPH_MATRIX_QR_HPP_ */

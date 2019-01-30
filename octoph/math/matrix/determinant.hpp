@@ -10,7 +10,9 @@
 
 #include <octoph/math/matrix/comatrix.hpp>
 
-namespace linear {
+namespace math {
+
+namespace matrix {
 
 template<class A, std::size_t>
 class determinant_type;
@@ -129,6 +131,7 @@ public:
 template<class A>
 determinant_type<A, A::ncol> determinant(const A& a) {
 	return determinant_type<A, A::ncol>(a);
+}
 }
 
 }

@@ -10,7 +10,8 @@
 
 #include <cassert>
 
-namespace linear {
+namespace math {
+namespace matrix {
 
 template<class T, T First, T ...Rest>
 class integer_sequence;
@@ -238,7 +239,7 @@ public:
 
 }
 ;
-
+}
 }
 
 #endif /* OCTOPH_MATRIX_MASK_HPP_ */

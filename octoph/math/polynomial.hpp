@@ -13,6 +13,8 @@
 #include <limits>
 #include <complex>
 
+namespace math {
+
 template<class T, std::size_t N>
 class polynomial {
 	using abs_type = decltype(std::abs(T()));
@@ -139,6 +141,7 @@ public:
 
 };
 
+
 template<class T, std::size_t N>
 const decltype(std::abs(T())) polynomial<T, N>::abs_zero = std::abs(T(0));
 
@@ -147,5 +150,9 @@ const decltype(std::abs(T())) polynomial<T, N>::abs_one = std::abs(T(1));
 
 template<class T, std::size_t N>
 const decltype(std::abs(T())) polynomial<T, N>::abs_two = std::abs(T(2));
+
+
+}
+
 
 #endif /* OCTOPH_MATH_POLYNOMIAL_HPP_ */

@@ -12,6 +12,7 @@
 
 #include <vector>
 
+namespace math{
 namespace basis {
 
 real legendre_p( int, real );
@@ -19,5 +20,5 @@ real dlegendre_p_dx( int, real );
 std::vector<real> find_legendre_roots(int n, const std::vector<real>& prev_roots);
 
 }
-
+}
 #endif /* OCTOPH_BASIS_LEGENDRE_HPP_ */

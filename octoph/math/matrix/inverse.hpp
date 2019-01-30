@@ -10,7 +10,8 @@
 
 #include <octoph/math/matrix/determinant.hpp>
 
-namespace linear {
+namespace math {
+namespace matrix {
 
 template<class A, std::size_t N = A::nrow>
 struct inverse_type {
@@ -133,7 +134,7 @@ inverse_type<A> inverse(const A& a) {
 	inverse_type<A> p(a);
 	return p;
 }
-
+}
 }
 
 #endif /* OCTOPH_MATRIX_INVERSE_HPP_ */

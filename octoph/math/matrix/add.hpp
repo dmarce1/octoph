@@ -7,8 +7,8 @@
 
 #ifndef OCTOPH_MATRIX_ADD_HPP_
 #define OCTOPH_MATRIX_ADD_HPP_
-
-namespace linear {
+namespace math {
+namespace matrix {
 
 template<class A, class B>
 class add_type {
@@ -62,5 +62,5 @@ add_type<A, B> add(const A& a, const B& b) {
 }
 
 }
-
+}
 #endif /* OCTOPH_MATRIX_ADD_HPP_ */

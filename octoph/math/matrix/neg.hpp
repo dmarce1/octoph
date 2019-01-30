@@ -8,8 +8,9 @@
 #ifndef OCTOPH_MATRIX_NEG_HPP_
 #define OCTOPH_MATRIX_NEG_HPP_
 
+namespace math {
 
-namespace linear {
+namespace matrix {
 
 template<class A>
 class neg_type {
@@ -63,6 +64,6 @@ neg_type<A> neg(const A& a) {
 }
 
 
-
+}
 
 #endif /* OCTOPH_MATRIX_NEG_HPP_ */

@@ -66,14 +66,14 @@ struct basis_init {
 		std::vector<real> roots;
 		for (int n = 1; n < PMAX; n++) {
 			auto tmp = roots;
-			roots = find_legendre_roots(n, tmp);
+			roots = math::basis::find_legendre_roots(n, tmp);
 			qwts_[n].resize(roots.size());
 			qpts_[n].resize(roots.size());
 			for (int i = 0; i < roots.size(); i++) {
 				qpts_[n][i] = roots[i];
 				qwts_[n][i] = 2.0;
 				qwts_[n][i] /= (real(1) - roots[i] * roots[i]);
-				const real dpdx = dlegendre_p_dx(n, roots[i]);
+				const real dpdx = math::basis::dlegendre_p_dx(n, roots[i]);
 				qwts_[n][i] /= dpdx * dpdx;
 			}
 		}

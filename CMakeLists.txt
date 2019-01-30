@@ -7,42 +7,42 @@ find_package(Boost REQUIRED)
 set(dependencies Boost::boost)
 
 set( matrix_headers
-    octoph/matrix/add.hpp
-    octoph/matrix/column.hpp
-    octoph/matrix/comatrix.hpp
-    octoph/matrix/determinant.hpp
-    octoph/matrix/inverse.hpp
-    octoph/matrix/mask.hpp
-    octoph/matrix/matrix.hpp
-    octoph/matrix/neg.hpp
-    octoph/matrix/product.hpp
-    octoph/matrix/QR.hpp
-    octoph/matrix/transpose.hpp
+    octoph/math/matrix/add.hpp
+    octoph/math/matrix/column.hpp
+    octoph/math/matrix/comatrix.hpp
+    octoph/math/matrix/determinant.hpp
+    octoph/math/matrix/inverse.hpp
+    octoph/math/matrix/mask.hpp
+    octoph/math/matrix/matrix.hpp
+    octoph/math/matrix/neg.hpp
+    octoph/math/matrix/product.hpp
+    octoph/math/matrix/QR.hpp
+    octoph/math/matrix/transpose.hpp
  )
 
 set(source_files
     src/main.cpp
-    src/basis/basis.cpp
-    src/basis/legendre.cpp
+    src/math/basis/basis.cpp
+    src/math/basis/legendre.cpp
     src/cell/cell_client.cpp
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
     src/cell/cell_server.cpp
     src/math/math.cpp
-    src/matrix/matrix.cpp
+    src/math/matrix/matrix.cpp
 )
 
 set(header_files
     ocotph/octoph.hpp
     ocotph/svec.hpp
-    octoph/basis/basis.hpp
-    octoph/basis/legendre.hpp
+    octoph/math/basis/basis.hpp
+    octoph/math/basis/legendre.hpp
     octoph/cell/cell_client.hpp
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
  	${matrix_headers}
-    octoph/math/math.hpp
+    octoph/math/math/math.hpp
     octoph/math/polynomial.hpp
 )
 
@@ -62,24 +62,24 @@ add_hpx_executable(
 set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -std=c++17 -march=native )
 
 
-add_executable            (basis_test src/basis/basis.cpp octoph/basis/basis.hpp src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )
-target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+add_executable            (basis_test src/math/basis/basis.cpp octoph/math/basis/basis.hpp src/math/basis/legendre.cpp octoph/math/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )
+target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options    (basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
 
-add_executable(            legendre_test src/basis/legendre.cpp octoph/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp )
-target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+add_executable(            legendre_test src/math/basis/legendre.cpp octoph/math/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp )
+target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
 
 add_executable            (math_test src/math/math.cpp octoph/math/math.hpp     octoph/math/polynomial.hpp)
-target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
 
-add_executable(            matrix_test src/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
-target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+add_executable(            matrix_test src/math/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
+target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX )
 
-target_include_directories(octoph        PRIVATE ${CMAKE_SOURCE_DIR}/octoph)
+target_include_directories(octoph        PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_compile_options(octoph        PRIVATE ${FLAGS})
 

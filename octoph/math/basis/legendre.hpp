@@ -8,7 +8,7 @@
 #ifndef OCTOPH_BASIS_LEGENDRE_HPP_
 #define OCTOPH_BASIS_LEGENDRE_HPP_
 
-#include "octoph.hpp"
+#include <octoph/octoph.hpp>
 
 #include <vector>
 

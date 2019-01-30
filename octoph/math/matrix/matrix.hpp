@@ -11,7 +11,7 @@
 
 #include <functional>
 
-#include "matrix/mask.hpp"
+#include <octoph/math/matrix/mask.hpp>
 
 namespace linear {
 

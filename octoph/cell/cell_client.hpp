@@ -8,7 +8,7 @@
 #ifndef OCTOPH_CELL_CELL_CLIENT_HPP_
 #define OCTOPH_CELL_CELL_CLIENT_HPP_
 
-#include "cell/cell_server.hpp"
+#include <octoph/cell/cell_server.hpp>
 
 class cell_client {
 private:

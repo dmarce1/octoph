@@ -1,7 +1,7 @@
 
 #include <hpx/hpx_init.hpp>
 
-#include "basis/basis.hpp"
+#include <octoph/math/basis/basis.hpp>
 
 int main(int argc, char* argv[]) {
 	hpx::init(argc, argv);

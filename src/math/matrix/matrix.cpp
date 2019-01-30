@@ -1,17 +1,17 @@
-#include "matrix/matrix.hpp"
-#include "matrix/product.hpp"
-#include "matrix/determinant.hpp"
-#include "matrix/add.hpp"
+#include <octoph/math/matrix/matrix.hpp>
+#include <octoph/math/matrix/product.hpp>
+#include <octoph/math/matrix/determinant.hpp>
+#include <octoph/math/matrix/add.hpp>
 
-#include <matrix/inverse.hpp>
-#include <matrix/transpose.hpp>
-#include <math/math.hpp>
-#include "matrix/add.hpp"
+#include <octoph/math/matrix/inverse.hpp>
+#include <octoph/math/matrix/transpose.hpp>
+#include <octoph/math/math.hpp>
+#include <octoph/math/matrix/add.hpp>
 using real = math::real;
-#include <matrix/QR.hpp>
+#include <octoph/math/matrix/QR.hpp>
 #include <limits>
 
-#include <math/polynomial.hpp>
+#include <octoph/math/polynomial.hpp>
 #include <array>
 namespace linear {
 

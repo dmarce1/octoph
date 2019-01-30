@@ -8,8 +8,8 @@
 #ifndef OCTOPH_CELL_CELL_DIRECTORY_HPP_
 #define OCTOPH_CELL_CELL_DIRECTORY_HPP_
 
-#include "cell/cell_client.hpp"
-#include "cell/cell_location.hpp"
+#include <octoph/cell/cell_client.hpp>
+#include <octoph/cell/cell_location.hpp>
 
 
 

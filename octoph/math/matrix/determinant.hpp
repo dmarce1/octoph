@@ -8,7 +8,7 @@
 #ifndef OCTOPH_MATRIX_DETERMINANT_HPP_
 #define OCTOPH_MATRIX_DETERMINANT_HPP_
 
-#include "matrix/comatrix.hpp"
+#include <octoph/math/matrix/comatrix.hpp>
 
 namespace linear {
 

@@ -5,9 +5,9 @@
  *      Author: dmarce1
  */
 
-#include "svec.hpp"
-#include "basis/basis.hpp"
-#include "basis/legendre.hpp"
+#include <octoph/svec.hpp>
+#include <octoph/math/basis/basis.hpp>
+#include <octoph/math/basis/legendre.hpp>
 
 #include <stdio.h>
 

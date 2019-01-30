@@ -5,7 +5,7 @@
  *      Author: dmarce1
  */
 
-#include "basis/legendre.hpp"
+#include <octoph/math/basis/legendre.hpp>
 
 #include <functional>
 

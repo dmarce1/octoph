@@ -8,7 +8,7 @@
 #ifndef OCTOPH_MATRIX_INVERSE_HPP_
 #define OCTOPH_MATRIX_INVERSE_HPP_
 
-#include "matrix/determinant.hpp"
+#include <octoph/math/matrix/determinant.hpp>
 
 namespace linear {
 

@@ -8,7 +8,7 @@
 #ifndef OCTOPH_CELL_CELL_LOCATION_HPP_
 #define OCTOPH_CELL_CELL_LOCATION_HPP
 
-#include "octoph.hpp"
+#include <octoph/octoph.hpp>
 #include <bits/stdc++.h>
 #include <cstdint>
 

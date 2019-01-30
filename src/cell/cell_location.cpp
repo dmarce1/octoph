@@ -5,7 +5,7 @@
  *      Author: dmarce1
  */
 
-#include "cell/cell_location.hpp"
+#include <octoph/cell/cell_location.hpp>
 
 #include <hpx/runtime/find_localities.hpp>
 

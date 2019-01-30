@@ -8,10 +8,10 @@
 #ifndef OCTOPH_MATRIX_QR_HPP_
 #define OCTOPH_MATRIX_QR_HPP_
 
-#include <matrix/matrix.hpp>
-#include <matrix/add.hpp>
-#include <matrix/neg.hpp>
-#include <matrix/column.hpp>
+#include <octoph/math/matrix/matrix.hpp>
+#include <octoph/math/matrix/add.hpp>
+#include <octoph/math/matrix/neg.hpp>
+#include <octoph/math/matrix/column.hpp>
 
 namespace linear {
 namespace detail {

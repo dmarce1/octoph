@@ -1,4 +1,4 @@
-#include "cell/cell_directory.hpp"
+#include <octoph/cell/cell_directory.hpp>
 
 #include <hpx/lcos/local/mutex.hpp>
 

@@ -8,7 +8,7 @@
 #ifndef OCTOPH_BASIS_BASIS_HPP_
 #define OCTOPH_BASIS_BASIS_HPP_
 
-#include "basis/legendre.hpp"
+#include <octoph/math/basis/legendre.hpp>
 
 #include <valarray>
 

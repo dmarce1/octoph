@@ -1,4 +1,4 @@
-#include "math/math.hpp"
+#include <octoph/math/math.hpp>
 
 namespace math {
 
@@ -54,7 +54,7 @@ if constexpr (sizeof...(Rest) == 0) {
 
 #include <complex>
 
-#include "math/polynomial.hpp"
+#include <octoph/math/polynomial.hpp>
 #ifdef TEST_MATH
 #include <array>
 int main() {

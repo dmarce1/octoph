@@ -83,7 +83,7 @@ public:
 	using roots_type = std::array<T, N - 1>;
 private:
 
-	roots_type roots_init() const {
+	roots_type roots_init() {
 		const auto r_max = root_upper_bound();
 		roots_type x;
 		if constexpr (std::is_floating_point < T > ::value) {
@@ -106,20 +106,15 @@ private:
 	}
 public:
 
-	roots_type roots() const {
+	roots_type roots() {
 		const auto D = d_dx();
 		roots_type w;
 		auto x = roots_init();
 		typename std::remove_const<decltype(abs_zero)>::type max_change;
-		const auto toler = std::abs(std::numeric_limits < T > ::round_error());
-		int iters = 0;
+		const auto toler = 1.0e-10;
 		abs_type err;
 		do {
 			err = abs_zero;
-			iters++;
-			if (iters > 15) {
-				break;
-			}
 			for (auto k = 0; k < N - 1; k++) {
 				T factor = 0.0;
 				for (auto j = 0; j < N - 1; j++) {
@@ -134,8 +129,10 @@ public:
 			}
 			for (auto k = 0; k < N - 1; k++) {
 				x[k] += w[k];
+				printf("(%e,%e) %e %e ", x[k].real(), x[k].imag(), (*this)(x[k]).real(), (*this)(x[k]).imag());
 			}
 			err = std::sqrt(err);
+			printf("%e %e\n", err, toler);
 		} while (err > toler);
 		return x;
 	}
@@ -143,12 +140,12 @@ public:
 };
 
 template<class T, std::size_t N>
-const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_zero = std::abs(T(0));
+const decltype(std::abs(T())) polynomial<T, N>::abs_zero = std::abs(T(0));
 
 template<class T, std::size_t N>
-const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_one = std::abs(T(1));
+const decltype(std::abs(T())) polynomial<T, N>::abs_one = std::abs(T(1));
 
 template<class T, std::size_t N>
-const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_two = std::abs(T(2));
+const decltype(std::abs(T())) polynomial<T, N>::abs_two = std::abs(T(2));
 
 #endif /* OCTOPH_MATH_POLYNOMIAL_HPP_ */

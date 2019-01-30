@@ -52,12 +52,14 @@ if constexpr (sizeof...(Rest) == 0) {
 }
 }
 
+#include <complex>
+
 #include "math/polynomial.hpp"
 #ifdef TEST_MATH
 #include <array>
 int main() {
 
-auto p = polynomial<double,3>(std::array<double,3>( { {1,2,1}}));
+auto p = polynomial<std::complex<double>,3>(std::array<std::complex<double>,3>( { {1,0,-1}}));
 p.roots();
 
 return 0;

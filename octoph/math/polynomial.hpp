@@ -10,9 +10,18 @@
 
 #include <array>
 #include <algorithm>
+#include <limits>
+#include <complex>
 
 template<class T, std::size_t N>
 class polynomial {
+	using abs_type = decltype(std::abs(T()));
+	const static abs_type abs_zero;
+	const static abs_type abs_one;
+	const static abs_type abs_two;
+	constexpr static auto zero = T(0);
+	constexpr static auto one = T(1);
+	constexpr static auto two = T(2);
 	std::array<T, N> c_;
 public:
 
@@ -28,9 +37,8 @@ public:
 		return c_[i];
 	}
 
-
 	T operator()(const T& x0) const {
-		T x = T(1);
+		T x = one;
 		T f = c_[0];
 		for (auto i = 1; i < N; i++) {
 			x *= x0;
@@ -56,51 +64,91 @@ public:
 		return polynomial(I);
 	}
 
-	std::array<T, N - 1> roots() {
-		const auto D = d_dx();
-		std::array<T, N - 1> x;
-		std::array<T, N - 1> w;
+	abs_type root_upper_bound() const {
+		abs_type amax = abs_zero;
 		for (auto i = 0; i < N - 1; i++) {
-			x[i] = T(i);
+			amax = std::max(amax, std::abs(c_[i]));
 		}
-		//	for( auto y = -1.0; y < 1.0; y += 0.1) {
-		//		printf( "%e %e %e\n", y, (*this)(y), d_dx()(y));
-		//	}
-		for (auto k = 0; k < N - 1; k++) {
-			printf("%e ", x[k]);
+		return abs_one + amax / std::abs(c_[N - 1]);
+	}
+
+	abs_type root_lower_bound() const {
+		abs_type amax = abs_zero;
+		const auto abs_c0 = std::abs(c_[0]);
+		for (auto i = 1; i < N; i++) {
+			amax = std::max(amax, std::abs(c_[i]));
 		}
-		printf("\n");
-		for (auto i = 0; i < 100000000000; i++) {
+		return abs_c0 / (abs_c0 + amax / std::abs(c_[N - 1]));
+	}
+	using roots_type = std::array<T, N - 1>;
+private:
+
+	roots_type roots_init() const {
+		const auto r_max = root_upper_bound();
+		roots_type x;
+		if constexpr (std::is_floating_point < T > ::value) {
+			for (auto i = 0; i < N - 1; i++) {
+				x[i] = (T(2) * (T(i) / T(N - 1)) - one) * r_max;
+			}
+		} else {
+			const auto r_min = root_lower_bound();
+			const auto dtheta = constants::golden_angle<abs_type>;
+			abs_type theta = dtheta / abs_two;
+			for (auto i = 0; i < N - 1; i++) {
+				const abs_type b = (abs_type(2) * (abs_type(i) / abs_type(N - 1)) - abs_type(1));
+				const auto r = b * (r_max - r_min) + r_min;
+				x[i].real(r * std::cos(theta));
+				x[i].imag(r * std::sin(theta));
+				theta += dtheta;
+			}
+		}
+		return x;
+	}
+public:
+
+	roots_type roots() const {
+		const auto D = d_dx();
+		roots_type w;
+		auto x = roots_init();
+		typename std::remove_const<decltype(abs_zero)>::type max_change;
+		const auto toler = std::abs(std::numeric_limits < T > ::round_error());
+		int iters = 0;
+		abs_type err;
+		do {
+			err = abs_zero;
+			iters++;
+			if (iters > 15) {
+				break;
+			}
 			for (auto k = 0; k < N - 1; k++) {
 				T factor = 0.0;
 				for (auto j = 0; j < N - 1; j++) {
 					if (k != j) {
-						factor += T(1) / T(x[k] - x[j]);
+						factor += one / (x[k] - x[j]);
 					}
 				}
 				const auto P = (*this)(x[k]);
 				const auto dP = D(x[k]);
-				w[k] = -P * (dP - P * factor);
-				if (k > 0) {
-					if (w[k] < 0.0) {
-						w[k] = std::max(w[k], T(T(0.49999999) * (x[k - 1] - x[k])));
-					}
-				}
-				if (k < N - 2) {
-					if (w[k] > 0.0) {
-						w[k] = std::min(w[k], T(T(0.49999999) * (x[k + 1] - x[k])));
-					}
-				}
+				w[k] = P / (P * factor - dP);
+				err += std::abs(P * P);
 			}
 			for (auto k = 0; k < N - 1; k++) {
 				x[k] += w[k];
-				printf("%e ", x[k]);
 			}
-			printf("\n");
-		}
+			err = std::sqrt(err);
+		} while (err > toler);
 		return x;
 	}
 
 };
+
+template<class T, std::size_t N>
+const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_zero = std::abs(T(0));
+
+template<class T, std::size_t N>
+const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_one = std::abs(T(1));
+
+template<class T, std::size_t N>
+const typename polynomial<T, N>::abs_type polynomial<T, N>::abs_two = std::abs(T(2));
 
 #endif /* OCTOPH_MATH_POLYNOMIAL_HPP_ */

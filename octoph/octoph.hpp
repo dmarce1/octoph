@@ -17,9 +17,6 @@ using child_type = int;
 using dir_type = int;
 
 
-//using real = double;
-using real = math::real;
-
 
 #ifndef NDIM
 #error

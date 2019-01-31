@@ -7,7 +7,7 @@
 #include <octoph/math/matrix/transpose.hpp>
 #include <octoph/math/math.hpp>
 #include <octoph/math/matrix/add.hpp>
-using real = math::real;
+
 #include <octoph/math/matrix/QR.hpp>
 #include <limits>
 

@@ -10,6 +10,7 @@
 #define OCTOPH_MATRIX_MATRIX_HPP_
 
 #include <functional>
+#include <octoph/math/matrix/characteristic.hpp>
 
 #include <octoph/math/matrix/mask.hpp>
 namespace math {

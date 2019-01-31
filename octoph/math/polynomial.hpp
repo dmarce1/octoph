@@ -14,6 +14,7 @@
 #include <limits>
 #include <complex>
 #include <octoph/exception/exception.hpp>
+#include <octoph/math/math.hpp>
 
 namespace math {
 

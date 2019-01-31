@@ -8,6 +8,7 @@ set(dependencies Boost::boost)
 
 set( matrix_headers
     octoph/math/matrix/add.hpp
+    octoph/math/matrix/characteristic.hpp
     octoph/math/matrix/column.hpp
     octoph/math/matrix/comatrix.hpp
     octoph/math/matrix/determinant.hpp

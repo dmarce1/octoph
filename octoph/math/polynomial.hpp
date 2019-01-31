@@ -17,10 +17,6 @@ namespace math {
 
 template<class T, std::size_t N>
 class polynomial {
-	using abs_type = decltype(std::abs(T()));
-	const static abs_type abs_zero;
-	const static abs_type abs_one;
-	const static abs_type abs_two;
 	constexpr static auto zero = T(0);
 	constexpr static auto one = T(1);
 	constexpr static auto two = T(2);
@@ -49,6 +45,16 @@ public:
 		return f;
 	}
 
+	std::complex<T> operator()(const std::complex<T>& x0) const {
+		std::complex<T> x = one;
+		std::complex<T> f = c_[0];
+		for (auto i = 1; i < N; i++) {
+			x *= x0;
+			f += c_[i] * x;
+		}
+		return f;
+	}
+
 	polynomial<T, N - 1> d_dx() const {
 		std::array<T, N - 1> d;
 		for (auto i = 1; i < N; i++) {
@@ -66,59 +72,51 @@ public:
 		return polynomial(I);
 	}
 
-	abs_type root_upper_bound() const {
-		abs_type amax = abs_zero;
+	T root_upper_bound() const {
+		T amax = zero;
 		for (auto i = 0; i < N - 1; i++) {
 			amax = std::max(amax, std::abs(c_[i]));
 		}
-		return abs_one + amax / std::abs(c_[N - 1]);
+		return one + amax / std::abs(c_[N - 1]);
 	}
 
-	abs_type root_lower_bound() const {
-		abs_type amax = abs_zero;
-		const auto abs_c0 = std::abs(c_[0]);
+	T root_lower_bound() const {
+		T amax = zero;
+		const auto c0 = std::abs(c_[0]);
 		for (auto i = 1; i < N; i++) {
 			amax = std::max(amax, std::abs(c_[i]));
 		}
-		return abs_c0 / (abs_c0 + amax / std::abs(c_[N - 1]));
+		return c0 / (c0 + amax / std::abs(c_[N - 1]));
 	}
-	using roots_type = std::array<T, N - 1>;
+	using roots_type = std::array<std::complex<T>, N - 1>;
 private:
 
 	roots_type roots_init() {
-		const auto r_max = root_upper_bound();
-		roots_type x;
-		if constexpr (std::is_floating_point < T > ::value) {
-			for (auto i = 0; i < N - 1; i++) {
-				x[i] = (T(2) * (T(i) / T(N - 1)) - one) * r_max;
-			}
-		} else {
-			const auto r_min = root_lower_bound();
-			const auto dtheta = constants::golden_angle<abs_type>;
-			abs_type theta = dtheta / abs_two;
-			for (auto i = 0; i < N - 1; i++) {
-				const abs_type b = (abs_type(2) * (abs_type(i) / abs_type(N - 1)) - abs_type(1));
-				const auto r = b * (r_max - r_min) + r_min;
-				x[i].real(r * std::cos(theta));
-				x[i].imag(r * std::sin(theta));
-				theta += dtheta;
-			}
-		}
-		return x;
 	}
 public:
 
 	roots_type roots() {
 		const auto D = d_dx();
 		roots_type w;
-		auto x = roots_init();
-		typename std::remove_const<decltype(abs_zero)>::type max_change;
-		const auto toler = 1.0e-10;
-		abs_type err;
+		roots_type x;
+		const auto r_max = root_upper_bound();
+		const auto r_min = root_lower_bound();
+		const auto dtheta = constants::golden_angle<T>;
+		T theta = dtheta / two;
+		for (auto i = 0; i < N - 1; i++) {
+			const T b = (T(2) * (T(i) / T(N - 1)) - T(1));
+			const auto r = b * (r_max - r_min) + r_min;
+			x[i].real(r * std::cos(theta));
+			x[i].imag(r * std::sin(theta));
+			theta += dtheta;
+		}
+		typename std::remove_const<T>::type max_change;
+		const auto toler = std::pow(0.1, std::numeric_limits<T>::digits10 - 1);
+		T err;
 		do {
-			err = abs_zero;
+			err = zero;
 			for (auto k = 0; k < N - 1; k++) {
-				T factor = 0.0;
+				std::complex<T> factor = 0.0;
 				for (auto j = 0; j < N - 1; j++) {
 					if (k != j) {
 						factor += one / (x[k] - x[j]);
@@ -131,28 +129,14 @@ public:
 			}
 			for (auto k = 0; k < N - 1; k++) {
 				x[k] += w[k];
-				printf("(%e,%e) %e %e ", x[k].real(), x[k].imag(), (*this)(x[k]).real(), (*this)(x[k]).imag());
 			}
 			err = std::sqrt(err);
-			printf("%e %e\n", err, toler);
 		} while (err > toler);
 		return x;
 	}
 
 };
 
-
-template<class T, std::size_t N>
-const decltype(std::abs(T())) polynomial<T, N>::abs_zero = std::abs(T(0));
-
-template<class T, std::size_t N>
-const decltype(std::abs(T())) polynomial<T, N>::abs_one = std::abs(T(1));
-
-template<class T, std::size_t N>
-const decltype(std::abs(T())) polynomial<T, N>::abs_two = std::abs(T(2));
-
-
 }
-
 
 #endif /* OCTOPH_MATH_POLYNOMIAL_HPP_ */

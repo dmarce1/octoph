@@ -71,7 +71,11 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="basis" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        <entry excluding="src/exception|octoph/exception|exception|basis" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="octoph/exception"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/exception"/>
                         					
                     </sourceEntries>
                     				

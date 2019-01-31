@@ -59,7 +59,7 @@ if constexpr (sizeof...(Rest) == 0) {
 #include <array>
 int main() {
 
-auto p = math::polynomial<std::complex<double>,5>(std::array<std::complex<double>,5>( { {1, 4, 1,0,-1}}));
+auto p = math::polynomial<double,5>(std::array<double,5>( { {1, 4, 1,0,-1}}));
 p.roots();
 
 return 0;

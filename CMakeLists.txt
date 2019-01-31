@@ -28,6 +28,7 @@ set(source_files
     src/cell/cell_directory.cpp
     src/cell/cell_location.cpp
     src/cell/cell_server.cpp
+    src/exception/exception.cpp
     src/math/math.cpp
     src/math/matrix/matrix.cpp
 )
@@ -41,6 +42,7 @@ set(header_files
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
+    octoph/exception/exception.hpp
  	${matrix_headers}
     octoph/math/math/math.hpp
     octoph/math/polynomial.hpp

@@ -10,21 +10,34 @@
 
 #include <utility>
 #include <tuple>
+#include <type_traits>
+#include <array>
+#include <functional>
+#include <functional>
+
 
 namespace math {
 
 template<class F, class ...A>
 inline auto operation(const F&, const A&...);
 
+
 namespace detail {
 template<class F, class ...A>
 class operation_type {
+
 	static constexpr auto N = sizeof...(A);
+
 	F f_;
+
 	std::tuple<const A&...> a_;
+
+	using result_type = typename std::result_of<F(typename A::value_type...)>::type;
+
 	operation_type(const F& f, const A& ... a) :
 			f_(f), a_(a...) {
 	}
+
 	template<class T, T ... I>
 	inline auto operate(int i, std::integer_sequence<T, I...> = std::make_index_sequence<N>()) const {
 		return f_(std::get<I>(a_)[i]...);
@@ -35,6 +48,7 @@ public:
 	auto operator[](const T& i) const {
 		return operate(i);
 	}
+
 	template<class G, class ...B>
 	friend auto math::operation(const G&, const B&...);
 };
@@ -46,8 +60,6 @@ inline auto operation(const F& f, const A&...a) {
 	return detail::operation_type(f, a...);
 
 }
-
-
 
 }
 

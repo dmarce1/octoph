@@ -10,8 +10,10 @@
 
 #include <array>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <complex>
+#include <octoph/exception/exception.hpp>
 
 namespace math {
 
@@ -21,6 +23,7 @@ class polynomial {
 	constexpr static auto one = T(1);
 	constexpr static auto two = T(2);
 	std::array<T, N> c_;
+	using roots_type = std::array<std::complex<T>, N - 1>;
 public:
 
 	polynomial(const std::array<T, N>& c) :
@@ -88,21 +91,16 @@ public:
 		}
 		return c0 / (c0 + amax / std::abs(c_[N - 1]));
 	}
-	using roots_type = std::array<std::complex<T>, N - 1>;
-private:
 
-	roots_type roots_init() {
-	}
-public:
-
-	roots_type roots() {
+	auto all_roots() {
+		constexpr auto iters_max = 40;
 		const auto D = d_dx();
-		roots_type w;
-		roots_type x;
 		const auto r_max = root_upper_bound();
 		const auto r_min = root_lower_bound();
 		const auto dtheta = constants::golden_angle<T>;
 		T theta = dtheta / two;
+		roots_type w;
+		roots_type x;
 		for (auto i = 0; i < N - 1; i++) {
 			const T b = (T(2) * (T(i) / T(N - 1)) - T(1));
 			const auto r = b * (r_max - r_min) + r_min;
@@ -111,15 +109,25 @@ public:
 			theta += dtheta;
 		}
 		typename std::remove_const<T>::type max_change;
-		const auto toler = std::pow(0.1, std::numeric_limits<T>::digits10 - 1);
+		const auto toler = std::pow(0.1, std::numeric_limits < T > ::digits10 - 1);
 		T err;
+		auto iters = 0;
 		do {
+			if( iters > iters_max ) {
+				THROW("root solver failed to converge after 40 iterations.");
+			}
+			iters++;
 			err = zero;
 			for (auto k = 0; k < N - 1; k++) {
-				std::complex<T> factor = 0.0;
+				RETRY: std::complex<T> factor = 0.0;
 				for (auto j = 0; j < N - 1; j++) {
 					if (k != j) {
-						factor += one / (x[k] - x[j]);
+						if (std::abs(x[k] - x[j]) < small<T>) {
+							x[k] += small<T>;
+							goto RETRY;
+						} else {
+							factor += one / (x[k] - x[j]);
+						}
 					}
 				}
 				const auto P = (*this)(x[k]);
@@ -129,6 +137,9 @@ public:
 			}
 			for (auto k = 0; k < N - 1; k++) {
 				x[k] += w[k];
+			}
+			if (std::isnan(err)) {
+				THROW("root solver failed to converge ending in NAN.");
 			}
 			err = std::sqrt(err);
 		} while (err > toler);

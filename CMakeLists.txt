@@ -72,7 +72,7 @@ add_executable(            legendre_test src/math/basis/legendre.cpp octoph/math
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
 
-add_executable            (math_test src/math/math.cpp octoph/math/math.hpp     octoph/math/polynomial.hpp)
+add_executable            (math_test src/math/math.cpp octoph/math/math.hpp  octoph/math/polynomial.hpp src/exception/exception.cpp octoph/exception/exception.hpp)
 target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
@@ -80,6 +80,10 @@ target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 add_executable(            matrix_test src/math/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX )
+
+add_executable(            exception_test src/exception/exception.cpp octoph/exception/exception.hpp  )
+target_include_directories(exception_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_options(    exception_test PRIVATE ${FLAGS} -DTEST_EXCEPTION )
 
 target_include_directories(octoph        PRIVATE ${CMAKE_SOURCE_DIR})
 

@@ -60,7 +60,7 @@ if constexpr (sizeof...(Rest) == 0) {
 int main() {
 
 auto p = math::polynomial<double,5>(std::array<double,5>( { {1, 4, 1,0,-1}}));
-p.roots();
+p.all_roots();
 
 return 0;
 

@@ -12,7 +12,9 @@
 #include <atomic>
 #include <cstdint>
 #include <cmath>
+#include <limits>
 
+namespace math {
 namespace constants {
 
 template<class T>
@@ -22,16 +24,22 @@ template<class T>
 inline constexpr T golden_ratio = 1.6180339887498948482045868343656381177203;
 
 template<class T>
-inline constexpr T golden_angle = T(2) * pi<T> * (T(1) - T(1) / golden_ratio<T>);
+inline constexpr T golden_angle = T(2) * pi < T > *(T(1) - T(1) / golden_ratio<T> );
 
 }
+
+template<class T>
+inline constexpr T large = std::sqrt(std::numeric_limits < T > ::max());
+
+template<class T>
+inline constexpr T small = std::sqrt(std::numeric_limits < T > ::min());
 
 template<class T>
 auto minmod(const T& a, const T& b) {
 	return (std::copysign(0.5, a) + std::copysign(0.5, b)) * (std::min(std::abs(a), std::abs(b)));
 }
 
-#include <octoph/math/polynomial.hpp>
+}
 
 #define NUMBER_BINARY_OP( type, op )                        \
 	inline type operator op (const type& other) const {     \

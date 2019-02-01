@@ -15,6 +15,32 @@
 #include <functional>
 #include <functional>
 
+#define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
+template<class A, class B>                                                                               \
+inline auto operator OP (const A& a, const B& b) {                                                       \
+	struct op_type {                                                                                     \
+		constexpr op_type() = default;                                                                   \
+		inline auto operator()(const typename A::value_type& a, const typename B::value_type& b) const { \
+			return a OP b;                                                                               \
+		}                                                                                                \
+	};                                                                                                   \
+	constexpr op_type op;                                                                                \
+	return operation(op, std::integral_constant<int, 1>(), a, b);                                        \
+}
+
+#define OCTOPH_MATH_CONTAINERS_UNARY_OP( OP )                           \
+template<class A>                                                       \
+inline auto operator OP (const A& a) {                                  \
+	struct op_type {                                                    \
+		constexpr op_type() = default;                                  \
+		inline auto operator()(const typename A::value_type& a) const { \
+			return OP a;                                                \
+		}                                                               \
+	};                                                                  \
+	constexpr op_type op;                                               \
+	return operation(op, std::integral_constant<int, 1>(), a);          \
+}
+
 namespace math {
 
 template<class A>
@@ -62,12 +88,12 @@ public:
 
 	using value_type = typename std::result_of<F(typename A::value_type...)>::type;
 
-	template<class T, auto ... I>
-	inline auto operate(auto i, std::integer_sequence<T, I...> = std::make_index_sequence<N>()) const {
+	template<std::size_t ... I>
+	inline value_type operate(auto i, std::integer_sequence<std::size_t, I...>) const {
 		return f_(std::get<I>(a_)[i]...);
 	}
 
-	std::size_t size() const {
+	int size() const {
 		return std::get < 0 > (a_).size();
 	}
 
@@ -76,41 +102,24 @@ public:
 	}
 
 	template<class T>
-	inline auto operator[](const T& i) const {
-		return operate(i);
+	inline value_type operator[](const T& i) const {
+		return operate(i, std::make_index_sequence<N>());
 	}
 
 	inline auto op_count() const {
 		return OP_COUNT * std::get < 0 > (a_).size() + other_ops<N - 1>();
 	}
 
+	template<class B>
+	inline operator B() const {
+		B copy;
+		for (int i = 0; i < size(); i++) {
+			copy[i] = operator[](i);
+		}
+		return std::move(copy);
+	}
+
 };
-
-#define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
-template<class A, class B>                                                                               \
-inline auto operator OP (const A& a, const B& b) {                                                       \
-	struct op_type {                                                                                     \
-		constexpr op_type() = default;                                                                   \
-		inline auto operator()(const typename A::value_type& a, const typename B::value_type& b) const { \
-			return a OP b;                                                                               \
-		}                                                                                                \
-	};                                                                                                   \
-	constexpr op_type op;                                                                                \
-	return operation(op, std::integral_constant<int, 1>(), a, b);                                        \
-}
-
-#define OCTOPH_MATH_CONTAINERS_UNARY_OP( OP )                           \
-template<class A>                                                       \
-inline auto operator OP (const A& a) {                                  \
-	struct op_type {                                                    \
-		constexpr op_type() = default;                                  \
-		inline auto operator()(const typename A::value_type& a) const { \
-			return OP a;                                                \
-		}                                                               \
-	};                                                                  \
-	constexpr op_type op;                                               \
-	return operation(op, std::integral_constant<int, 1>(), a);          \
-}
 
 OCTOPH_MATH_CONTAINERS_UNARY_OP(+);
 OCTOPH_MATH_CONTAINERS_UNARY_OP(-);

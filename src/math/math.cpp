@@ -12,10 +12,10 @@
 int main() {
 
 	using namespace math;
-	std::array<double,5> a, b;
+	std::array<double,5> a, b, c;
 	auto test = a + b;
 	auto test2 = b + test;
-
+	c = test2;
 	std::cout << test2.op_count() << "\n";
 
 

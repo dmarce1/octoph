@@ -16,6 +16,7 @@
 #include <thread>
 #include <hpx/async.hpp>
 
+#include <octoph/exception/exception.hpp>
 
 #define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
 template<class A, class B>                                                                               \
@@ -44,6 +45,7 @@ inline auto operator OP (const A& a) {                                  \
 }
 
 namespace math {
+namespace containers {
 
 template<class A>
 struct is_operation {
@@ -61,7 +63,14 @@ struct is_operation<operation<F, OP_COUNT, A...>> {
 template<class F, auto OP_COUNT, class ...A>
 class operation {
 	static constexpr auto N = sizeof...(A);
-	using tuple_type = std::tuple<const A&...>;
+	using tuple_type =
+	std::tuple<
+	typename std::conditional<
+	is_operation<A>::value,
+	A,
+	const A&
+	>::type...
+	>;
 
 	tuple_type a_;
 	F f_;
@@ -108,34 +117,41 @@ public:
 		return operate(i, std::make_index_sequence<N>());
 	}
 
-	inline auto op_count() const {
+	inline int op_count() const {
 		return OP_COUNT * std::get < 0 > (a_).size() + other_ops<N - 1>();
 	}
 
-	template<class B>
-	inline operator B() const {
+	template<class C>
+	inline void store(C& copy) const {
+		if (copy.size() < size()) {
+			THROW("store container too small");
+		}
 		static const auto max_threads = std::thread::hardware_concurrency();
-		constexpr auto alignment = 32;
-		constexpr auto min_ops_per_thread = 1024;
+		constexpr auto min_ops_per_thread = 1024*256;
 		auto nops = op_count();
 		const auto nthreads = std::min(int(nops / min_ops_per_thread), int(max_threads));
-
-		B copy;
-		std::vector<hpx::future<void>> futs(nthreads);
-		for (auto i = 0; i < nthreads; i++) {
-			const auto begin = alignment * ((i * size() / nthreads) / alignment);
-			const auto end = alignment * (((i + 1) * size() / nthreads) / alignment);
-			futs[i] = hpx::async( [begin, end, &copy, this]() {
+		std::vector<hpx::future<void>> futs(nthreads - 1);
+		for (auto i = 1; i < nthreads; i++) {
+			const auto begin = i * size() / nthreads;
+			const auto end = (i + 1) * size() / nthreads;
+			futs[i - 1] = hpx::async([begin, end, &copy, this]() {
+#pragma GCC ivdep
 				for( int i = begin; i < end; i++ ) {
 					copy[i] = operator[](i);
 				}
 			});
 		}
-		hpx::wait_all(std::begin(futs),std::end(futs));
-		return std::move(copy);
+		const auto begin = 0;
+		const auto end = size() / nthreads;
+#pragma GCC ivdep
+		for (int i = 0; i < end; i++) {
+			copy[i] = operator[](i);
+		}
+		hpx::wait_all(std::begin(futs), std::end(futs));
 	}
 
-};
+}
+;
 
 OCTOPH_MATH_CONTAINERS_UNARY_OP(+);
 OCTOPH_MATH_CONTAINERS_UNARY_OP(-);
@@ -160,5 +176,6 @@ OCTOPH_MATH_CONTAINERS_BINARY_OP(||);
 OCTOPH_MATH_CONTAINERS_BINARY_OP(>>);
 OCTOPH_MATH_CONTAINERS_BINARY_OP(<<);
 
+}
 }
 #endif /* OCTOPH_MATH_CONTAINERS_HPP_ */

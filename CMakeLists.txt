@@ -49,6 +49,23 @@ set(header_files
     octoph/math/polynomial.hpp
 )
 
+
+
+add_hpx_executable(
+    math_test
+  DEPENDENCIES
+    ${dependencies}
+  SOURCES
+ 	src/math/math.cpp 
+	src/exception/exception.cpp 
+  HEADERS
+ 	octoph/math/math.hpp  
+	octoph/math/polynomial.hpp 
+	octoph/exception/exception.hpp
+)
+target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
+
 add_hpx_executable(
   octoph
   DEPENDENCIES
@@ -94,21 +111,6 @@ add_hpx_executable(
 )
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
-
-add_hpx_executable(
-    math_test
-  DEPENDENCIES
-    ${dependencies}
-  SOURCES
- 	src/math/math.cpp 
-	src/exception/exception.cpp 
-  HEADERS
- 	octoph/math/math.hpp  
-	octoph/math/polynomial.hpp 
-	octoph/exception/exception.hpp
-)
-target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR})
-target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
 
 add_hpx_executable(            

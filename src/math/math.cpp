@@ -38,9 +38,9 @@ int hpx_main(int argc, char* argv[]) {
 	auto start = clock();
 	for( int n = 0; n < N; n++) {
 		for( int m = 0; m < N; m++) {
-			auto tmp = A[n][0] * B[0][m]   * B[0][m]   * B[0][m]  + A[n][1] * B[1][m]  + A[n][1] * A[n][1] * A[n][1] * A[n][1] * A[n][1] * A[n][1] * B[1][m]  + A[n][1] * B[1][m]  + A[n][1] * B[1][m]  + A[n][1] * B[1][m]  + A[n][1] * B[1][m]  + A[n][1] * B[1][m] + A[n][2] * B[2][m];
-			tmp.store(C[n][m]);
-			nops += tmp.op_count();
+			auto tmp = A[n][0] * 4.0
+		//	tmp.store(C[n][m]);
+		//	nops += tmp.op_count();
 		}
 	}
 	auto dt = (clock() - start) / double(CLOCKS_PER_SEC);

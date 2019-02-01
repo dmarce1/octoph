@@ -20,10 +20,23 @@
 
 #define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
 template<class A, class B>                                                                               \
-inline auto operator OP (const A& a, const B& b) {                                                       \
+inline decltype(typename A::value_type()*typename B::value_type()) \
+operator OP (const A& a, const B& b) {                                                       \
 	struct op_type {                                                                                     \
 		constexpr op_type() = default;                                                                   \
 		inline auto operator()(const typename A::value_type& a, const typename B::value_type& b) const { \
+			return a OP b;                                                                               \
+		}                                                                                                \
+	};                                                                                                   \
+	constexpr op_type op;                                                                                \
+	return operation(op, std::integral_constant<int, 1>(), a, b);                                        \
+} \
+template<class A, class B>                                                                               \
+inline decltype(typename A::value_type()*B()) \
+operator OP (const A& a, const B& b) {                                                       \
+	struct op_type {                                                                                     \
+		constexpr op_type() = default;                                                                   \
+		inline auto operator()(const typename A::value_type& a, const B& b) const { \
 			return a OP b;                                                                               \
 		}                                                                                                \
 	};                                                                                                   \
@@ -65,12 +78,7 @@ class operation {
 	static constexpr auto N = sizeof...(A);
 	using tuple_type =
 	std::tuple<
-	typename std::conditional<
-	is_operation<A>::value,
-	A,
-	const A&
-	>::type...
-	>;
+	typename std::conditional<is_operation<A>::value,A,const A&>::type...>;
 
 	tuple_type a_;
 	F f_;
@@ -127,7 +135,7 @@ public:
 			THROW("store container too small");
 		}
 		static const auto max_threads = std::thread::hardware_concurrency();
-		constexpr auto min_ops_per_thread = 1024*256;
+		constexpr auto min_ops_per_thread = 1024 * 256;
 		auto nops = op_count();
 		const auto nthreads = std::min(int(nops / min_ops_per_thread), int(max_threads));
 		std::vector<hpx::future<void>> futs(nthreads - 1);
@@ -136,10 +144,10 @@ public:
 			const auto end = (i + 1) * size() / nthreads;
 			futs[i - 1] = hpx::async([begin, end, &copy, this]() {
 #pragma GCC ivdep
-				for( int i = begin; i < end; i++ ) {
-					copy[i] = operator[](i);
-				}
-			});
+					for( int i = begin; i < end; i++ ) {
+						copy[i] = operator[](i);
+					}
+				});
 		}
 		const auto begin = 0;
 		const auto end = size() / nthreads;

@@ -65,20 +65,62 @@ add_hpx_executable(
 set( FLAGS -Wno-ignored-attributes -Wno-attributes -Wno-deprecated-declarations -Wno-unused-result -std=c++17 -march=native )
 
 
-add_executable            (basis_test src/math/basis/basis.cpp octoph/math/basis/basis.hpp src/math/basis/legendre.cpp octoph/math/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp  )
+add_hpx_executable(
+	basis_test
+  DEPENDENCIES
+    ${dependencies}
+  SOURCES
+ 	src/math/basis/basis.cpp 
+	src/math/math.cpp 
+	src/math/basis/legendre.cpp 
+ HEADERS
+	octoph/math/basis/basis.hpp 
+	octoph/math/basis/legendre.hpp 
+	octoph/math/math.hpp  
+)
+
 target_include_directories(basis_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options    (basis_test PRIVATE ${FLAGS} -DTEST_BASIS)
 
-add_executable(            legendre_test src/math/basis/legendre.cpp octoph/math/basis/legendre.hpp src/math/math.cpp octoph/math/math.hpp )
+add_hpx_executable(
+	legendre_test 
+ DEPENDENCIES
+    ${dependencies}
+ SOURCES
+ 	src/math/basis/legendre.cpp 
+ HEADERS
+	octoph/math/basis/legendre.hpp 
+	src/math/math.cpp octoph/math/math.hpp 
+)
 target_include_directories(legendre_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    legendre_test PRIVATE ${FLAGS} -DTEST_LEGENDRE)
 
-add_executable            (math_test src/math/math.cpp octoph/math/math.hpp  octoph/math/polynomial.hpp src/exception/exception.cpp octoph/exception/exception.hpp)
+add_hpx_executable(
+    math_test
+  DEPENDENCIES
+    ${dependencies}
+  SOURCES
+ 	src/math/math.cpp 
+	src/exception/exception.cpp 
+  HEADERS
+ 	octoph/math/math.hpp  
+	octoph/math/polynomial.hpp 
+	octoph/exception/exception.hpp
+)
 target_include_directories(math_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options    (math_test PRIVATE ${FLAGS} -DTEST_MATH)
 
 
-add_executable(            matrix_test src/math/matrix/matrix.cpp src/math/math.cpp  ${matrix_headers}  )
+add_hpx_executable(            
+	matrix_test 
+  DEPENDENCIES
+    ${dependencies}
+SOURCES
+	src/math/matrix/matrix.cpp 
+	src/math/math.cpp  
+HEADERS
+	${matrix_headers}  
+)
 target_include_directories(matrix_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_options(    matrix_test PRIVATE ${FLAGS} -DTEST_MATRIX )
 

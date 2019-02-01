@@ -13,7 +13,9 @@
 #include <type_traits>
 #include <array>
 #include <functional>
-#include <functional>
+#include <thread>
+#include <hpx/async.hpp>
+
 
 #define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
 template<class A, class B>                                                                               \
@@ -48,15 +50,15 @@ struct is_operation {
 	static constexpr auto value = false;
 };
 
-template<class F, int OP_COUNT, class ...A>
+template<class F, auto OP_COUNT, class ...A>
 class operation;
 
-template<class F, int OP_COUNT, class ...A>
+template<class F, auto OP_COUNT, class ...A>
 struct is_operation<operation<F, OP_COUNT, A...>> {
 	static constexpr auto value = true;
 };
 
-template<class F, int OP_COUNT, class ...A>
+template<class F, auto OP_COUNT, class ...A>
 class operation {
 	static constexpr auto N = sizeof...(A);
 	using tuple_type = std::tuple<const A&...>;
@@ -93,7 +95,7 @@ public:
 		return f_(std::get<I>(a_)[i]...);
 	}
 
-	int size() const {
+	auto size() const {
 		return std::get < 0 > (a_).size();
 	}
 
@@ -112,10 +114,24 @@ public:
 
 	template<class B>
 	inline operator B() const {
+		static const auto max_threads = std::thread::hardware_concurrency();
+		constexpr auto alignment = 32;
+		constexpr auto min_ops_per_thread = 1024;
+		auto nops = op_count();
+		const auto nthreads = std::min(int(nops / min_ops_per_thread), int(max_threads));
+
 		B copy;
-		for (int i = 0; i < size(); i++) {
-			copy[i] = operator[](i);
+		std::vector<hpx::future<void>> futs(nthreads);
+		for (auto i = 0; i < nthreads; i++) {
+			const auto begin = alignment * ((i * size() / nthreads) / alignment);
+			const auto end = alignment * (((i + 1) * size() / nthreads) / alignment);
+			futs[i] = hpx::async( [begin, end, &copy, this]() {
+				for( int i = begin; i < end; i++ ) {
+					copy[i] = operator[](i);
+				}
+			});
 		}
+		hpx::wait_all(std::begin(futs),std::end(futs));
 		return std::move(copy);
 	}
 

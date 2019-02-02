@@ -13,13 +13,11 @@
 #include <type_traits>
 #include <array>
 #include <functional>
+
 #include <thread>
 #include <hpx/async.hpp>
 
 #include <octoph/exception/exception.hpp>
-
-namespace math {
-namespace containers {
 
 #define OCTOPH_MATH_CONTAINERS_BINARY_OP( NAME, OP )                                                         \
 		template<class A, class B>                                                                           \
@@ -39,7 +37,7 @@ namespace containers {
 				return a OP b;                                                                               \
 			}                                                                                                \
 			using A_type = A;                                                                                \
-			using B_type = singleton<B>;                                                             \
+			using B_type = detail::singleton<B>;                                                             \
 		};                                                                                                   \
 		template<class B>                                                                                    \
 		struct NAME##_type<typename B::value_type,B> {                                                       \
@@ -48,7 +46,7 @@ namespace containers {
 			inline auto operator()(const A& a,const typename B::value_type& b) const {                       \
 				return a OP b;                                                                               \
 			}                                                                                                \
-			using A_type = singleton<A>;                                                             \
+			using A_type = detail::singleton<A>;                                                             \
 			using B_type = B;                                                                                \
 		};                                                                                                   \
 		template<class A, class B>                                                                           \
@@ -56,7 +54,7 @@ namespace containers {
 			using op_type = NAME##_type<A,B>;                                                                \
 			constexpr op_type op;                                                                            \
 			return operation(op,                                           \
-					typename op_type::A_type(a), typename op_type::B_type(b), std::integral_constant<int, 1>());                               \
+					typename op_type::A_type(a), typename op_type::B_type(b), std::integral_constant<int, 1>(),std::integral_constant<bool,false>());                               \
 		}
 
 #define OCTOPH_MATH_CONTAINERS_UNARY_OP( NAME, OP )                                                           \
@@ -70,8 +68,16 @@ namespace containers {
 		template<class A>                                                                                     \
 		inline auto operator OP (const A& a) {                                                                \
 			constexpr NAME##_type<A> op;                                                                      \
-			return operation(op, a, std::integral_constant<int, 1>());                                        \
+			return operation(op, a, a, std::integral_constant<int, 1>(),std::integral_constant<bool,true>());                                        \
 		}
+
+namespace math {
+namespace containers {
+
+template<class, class, class, int, bool>
+class operation;
+
+namespace detail {
 
 template<class T>
 class singleton {
@@ -98,11 +104,8 @@ struct is_operation {
 	static constexpr auto value = false;
 };
 
-template<class, class, class, int>
-class operation;
-
-template<class F, class A, class B, int OP_COUNT>
-struct is_operation<operation<F, A, B, OP_COUNT>> {
+template<class F, class A, class B, int OP_COUNT, bool UNARY>
+struct is_operation<operation<F, A, B, OP_COUNT, UNARY>> {
 	static constexpr auto value = true;
 };
 
@@ -121,12 +124,11 @@ struct ctr<singleton<T>> {
 	using value_type = char;
 };
 
-template<class F, class A, class B, int OP_COUNT>
-struct ctr<operation<F, A, B, OP_COUNT>> {
+template<class F, class A, class B, int OP_COUNT, bool UNARY>
+struct ctr<math::containers::operation<F, A, B, OP_COUNT, UNARY>> {
 	using A_type = typename ctr<A>::value_type;
 	using B_type = typename ctr<B>::value_type;
-	using value_type = A_type;
-//	using value_type = typename std::conditional<!std::is_same<A_type,char>::value,A_type, B_type>::type;
+	using value_type = typename std::conditional<!std::is_same<A_type,char>::value,A_type, B_type>::type;
 };
 
 template<class T, class U, int I>
@@ -144,39 +146,56 @@ struct is_storage_type<T, U, 0> {
 			std::is_same<U, typename std::remove_cv<typename std::remove_reference<type>::type>::type>::value;
 };
 
-template<class F, class A, class B, int OP_COUNT>
+}
+
+template<class F, class A, class B, int OP_COUNT, bool UNARY>
 class operation {
-	using A_type = typename std::conditional<is_operation<A>::value,A,const A&>::type;
-	using B_type = typename std::conditional<is_operation<B>::value,B,const B&>::type;
+	using A_type = typename std::conditional<detail::is_operation<A>::value,A,const A&>::type;
+	using B_type = typename std::conditional<detail::is_operation<B>::value,B,const B&>::type;
 
 	A_type a_;
 	B_type b_;
 	F f_;
 
+	template<class T>
+	class has_resize {
+		using one = char;
+		using two = long;
+
+		template<class C>
+		static one test(decltype(&C::resize));
+		template<class C>
+		static two test(...);
+
+	public:
+		static constexpr bool value = sizeof(test<T>(0)) == sizeof(char);
+	};
+
 public:
 
 	using value_type = typename std::result_of<F(typename A::value_type,typename B::value_type)>::type;
-	using container_type = typename ctr<operation<F,A,B,OP_COUNT>>::value_type;
+	using container_type = typename detail::ctr<operation<F,A,B,OP_COUNT,UNARY>>::value_type;
 
 	auto size() const {
 		return a_.size();
 	}
 
-	explicit operation(const F& f, const A& a, const B& b, std::integral_constant<int, OP_COUNT> I) :
+	explicit operation(const F& f, const A& a, const B& b, std::integral_constant<int, OP_COUNT> I,
+			std::integral_constant<bool, UNARY> U) :
 			f_(f), a_(a), b_(b) {
 	}
 
 	inline int op_count() const {
-		if constexpr (is_operation<A>::value) {
-			if constexpr (is_operation<B>::value) {
+		if constexpr (detail::is_operation<B>::value && !UNARY) {
+			if constexpr (detail::is_operation<A>::value) {
 				return OP_COUNT * a_.size() + a_.op_count() + b_.op_count();
 			} else {
-				return OP_COUNT * a_.size() + a_.op_count();
+				return OP_COUNT * a_.size() + b_.op_count();
 			}
 
 		} else {
-			if constexpr (is_operation<B>::value) {
-				return OP_COUNT * a_.size() + b_.op_count();
+			if constexpr (detail::is_operation<A>::value) {
+				return OP_COUNT * a_.size() + a_.op_count();
 			} else {
 				return OP_COUNT * a_.size();
 			}
@@ -185,33 +204,39 @@ public:
 
 	template<class T>
 	inline value_type operator[](const T& i) const {
-		return F(a_[i], b_[i]);
+		F f;
+		return f(a_[i], b_[i]);
 	}
 
 	inline operator container_type() const {
-		/*	if (copy.size() < size()) {
-		 THROW("store container too small");
-		 }
-		 static const auto max_threads = std::thread::hardware_concurrency();
-		 constexpr auto min_ops_per_thread = 1024 * 256;
-		 auto nops = op_count();
-		 const auto nthreads = std::min(int(nops / min_ops_per_thread), int(max_threads));
-		 std::vector<hpx::future<void>> futs(nthreads - 1);
-		 for (auto i = 1; i < nthreads; i++) {
-		 const auto begin = i * size() / nthreads;
-		 const auto end = (i + 1) * size() / nthreads;
-		 futs[i - 1] = hpx::async([begin, end, &copy, this]() {
-		 for( int i = begin; i < end; i++ ) {
-		 copy[i] = operator[](i);
-		 }
-		 });
-		 }
-		 const auto begin = 0;
-		 const auto end = size() / nthreads;
-		 for (int i = 0; i < end; i++) {
-		 copy[i] = operator[](i);
-		 }
-		 hpx::wait_all(std::begin(futs), std::end(futs));*/
+		container_type copy;
+		if constexpr (has_resize<container_type>::value) {
+			copy.resize(size());
+		}
+		if (copy.size() < size()) {
+			THROW("store container too small");
+		}
+		static const auto max_threads = std::thread::hardware_concurrency();
+		constexpr auto min_ops_per_thread = 1024 * 256;
+		auto nops = op_count();
+		const auto nthreads = std::min(int(nops / min_ops_per_thread), int(max_threads));
+		std::vector<hpx::future<void>> futs(nthreads - 1);
+		for (auto i = 1; i < nthreads; i++) {
+			const auto begin = i * size() / nthreads;
+			const auto end = (i + 1) * size() / nthreads;
+			futs[i - 1] = hpx::async([begin, end, &copy, this]() {
+				for( int i = begin; i < end; i++ ) {
+					copy[i] = operator[](i);
+				}
+			});
+		}
+		const auto begin = 0;
+		const auto end = size() / nthreads;
+		for (int i = 0; i < end; i++) {
+			copy[i] = operator[](i);
+		}
+		hpx::wait_all(std::begin(futs), std::end(futs));
+		return std::move(copy);
 	}
 
 }

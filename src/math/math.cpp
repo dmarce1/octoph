@@ -44,14 +44,20 @@ int hpx_main(int argc, char* argv[]) {
 			}
 		}
 	}
+	std::array<int,4> a, b;
+
+	a = -b;
+
 	long long nops;
 	auto start = clock();
 	for( int n = 0; n < N; n++) {
 		for( int m = 0; m < N; m++) {
-			auto tmp1 = B[0][m] * A[0][m];
+			auto tmp1 = -B[0][m];
 			C[n][m] = tmp1;
 			auto tmp2 = B[0][m] * 5.0;
-			auto tmp3 = 5.0 * B[0][m];
+			C[n][m] = tmp2;
+			auto tmp3 = A[0][m] * B[0][m];
+			C[n][m] = tmp3;
 			nops += tmp1.op_count();
 		}
 	}

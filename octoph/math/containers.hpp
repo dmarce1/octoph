@@ -18,47 +18,60 @@
 
 #include <octoph/exception/exception.hpp>
 
-#define OCTOPH_MATH_CONTAINERS_BINARY_OP( OP )                                                           \
-template<class A, class B>                                                                               \
-inline decltype(typename A::value_type()*typename B::value_type()) \
-operator OP (const A& a, const B& b) {                                                       \
-	struct op_type {                                                                                     \
-		constexpr op_type() = default;                                                                   \
-		inline auto operator()(const typename A::value_type& a, const typename B::value_type& b) const { \
-			return a OP b;                                                                               \
-		}                                                                                                \
-	};                                                                                                   \
-	constexpr op_type op;                                                                                \
-	return operation(op, std::integral_constant<int, 1>(), a, b);                                        \
-} \
-template<class A, class B>                                                                               \
-inline decltype(typename A::value_type()*B()) \
-operator OP (const A& a, const B& b) {                                                       \
-	struct op_type {                                                                                     \
-		constexpr op_type() = default;                                                                   \
-		inline auto operator()(const typename A::value_type& a, const B& b) const { \
-			return a OP b;                                                                               \
-		}                                                                                                \
-	};                                                                                                   \
-	constexpr op_type op;                                                                                \
-	return operation(op, std::integral_constant<int, 1>(), a, b);                                        \
-}
-
-#define OCTOPH_MATH_CONTAINERS_UNARY_OP( OP )                           \
-template<class A>                                                       \
-inline auto operator OP (const A& a) {                                  \
-	struct op_type {                                                    \
-		constexpr op_type() = default;                                  \
-		inline auto operator()(const typename A::value_type& a) const { \
-			return OP a;                                                \
-		}                                                               \
-	};                                                                  \
-	constexpr op_type op;                                               \
-	return operation(op, std::integral_constant<int, 1>(), a);          \
-}
-
 namespace math {
 namespace containers {
+
+#define OCTOPH_MATH_CONTAINERS_BINARY_OP( NAME, OP )                                                         \
+		template<class A, class B>                                                                           \
+		struct NAME##_type {                                                                                 \
+			constexpr NAME##_type() = default;                                                               \
+			inline auto operator()(const typename A::value_type& a, const typename B::value_type& b) const { \
+				return a OP b;                                                                               \
+			}                                                                                                \
+			using A_type = A;                                                                                \
+			using B_type = B;                                                                                \
+		};                                                                                                   \
+		template<class A>                                                                                    \
+		struct NAME##_type<A,typename A::value_type> {                                                       \
+			using B = typename A::value_type;                                                                \
+			constexpr NAME##_type() = default;                                                               \
+			inline auto operator()(const typename A::value_type& a, const B& b) const {                      \
+				return a OP b;                                                                               \
+			}                                                                                                \
+			using A_type = A;                                                                                \
+			using B_type = detail::singleton<B>;                                                             \
+		};                                                                                                   \
+		template<class B>                                                                                    \
+		struct NAME##_type<typename B::value_type,B> {                                                       \
+			using A = typename B::value_type;                                                                \
+			constexpr NAME##_type() = default;                                                               \
+			inline auto operator()(const A& a,const typename B::value_type& b) const {                       \
+				return a OP b;                                                                               \
+			}                                                                                                \
+			using A_type = detail::singleton<A>;                                                             \
+			using B_type = B;                                                                                \
+		};                                                                                                   \
+		template<class A, class B>                                                                           \
+		inline auto operator OP (const A& a, const  B& b ) {                                                 \
+			using op_type = NAME##_type<A,B>;                                                                \
+			constexpr op_type op;                                                                            \
+			return operation(op, std::integral_constant<int, 1>(),                                           \
+					typename op_type::A_type(a), typename op_type::B_type(b));                               \
+		}
+
+#define OCTOPH_MATH_CONTAINERS_UNARY_OP( NAME, OP )                                                           \
+		template<class A>                                                                                     \
+		struct NAME##_type {                                                                                  \
+			constexpr NAME##_type() = default;                                                                \
+			inline auto operator()(const typename A::value_type& a) const {                                   \
+				return OP a;                                                                                  \
+			}                                                                                                 \
+		};                                                                                                    \
+		template<class A>                                                                                     \
+		inline auto operator OP (const A& a) {                                                                \
+			constexpr NAME##_type<A> op;                                                                      \
+			return operation(op, std::integral_constant<int, 1>(), a);                                        \
+		}
 
 template<class A>
 struct is_operation {
@@ -161,28 +174,48 @@ public:
 }
 ;
 
-OCTOPH_MATH_CONTAINERS_UNARY_OP(+);
-OCTOPH_MATH_CONTAINERS_UNARY_OP(-);
-OCTOPH_MATH_CONTAINERS_UNARY_OP(~);
-OCTOPH_MATH_CONTAINERS_UNARY_OP(!);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(+);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(-);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(*);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(/);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(%);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(>);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(<);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(>=);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(<=);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(==);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(!=);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(^);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(&);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(|);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(&&);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(||);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(>>);
-OCTOPH_MATH_CONTAINERS_BINARY_OP(<<);
+namespace detail {
+
+template<class T>
+class singleton {
+	T value_;
+public:
+	using value_type = T;
+	inline singleton(T&& value) :
+			value_(std::move(value)) {
+	}
+	inline singleton(const T& value) :
+			value_(value) {
+	}
+	inline const T& operator[](int) const {
+		return value_;
+	}
+};
+
+}
+
+OCTOPH_MATH_CONTAINERS_BINARY_OP(mul, *);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(add, +);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(sub, -);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(div, /);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(mod, %);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(gt, >);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(lt, <);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(gte, >=);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(lte, <=);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(eq, ==);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(neq, !=);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(bxor, ^);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(band, &);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(bor, |);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(land, &&);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(lor, ||);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(shr, >>);
+OCTOPH_MATH_CONTAINERS_BINARY_OP(shl, <<);
+OCTOPH_MATH_CONTAINERS_UNARY_OP(pos, +);
+OCTOPH_MATH_CONTAINERS_UNARY_OP(neg, -);
+OCTOPH_MATH_CONTAINERS_UNARY_OP(bnot, ~);
+OCTOPH_MATH_CONTAINERS_UNARY_OP(lnot, !);
 
 }
 }

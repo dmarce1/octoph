@@ -12,6 +12,14 @@
 constexpr auto N = 3;
 constexpr auto L = 10000000;
 
+#include <utility>
+
+struct accesst {
+	int begin();
+};
+
+struct no_access {};
+
 #ifdef TEST_MATH
 #include <array>
 
@@ -20,6 +28,8 @@ int main(int argc, char* argv[]) {
 }
 
 int hpx_main(int argc, char* argv[]) {
+
+
 	using namespace math::containers;
 	std::array<std::array<std::vector<double>, N>, N> A, B, C;
 	for( int n = 0; n < N; n++) {
@@ -38,7 +48,9 @@ int hpx_main(int argc, char* argv[]) {
 	auto start = clock();
 	for( int n = 0; n < N; n++) {
 		for( int m = 0; m < N; m++) {
-			auto tmp = A[n][0] * 4.0
+			auto tmp1 = B[0][m] * detail::singleton<double>(1.0);
+			auto tmp2 = B[0][m] * 5.0;
+			auto tmp3 = 5.0 * B[0][m];
 		//	tmp.store(C[n][m]);
 		//	nops += tmp.op_count();
 		}

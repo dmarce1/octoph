@@ -48,11 +48,11 @@ int hpx_main(int argc, char* argv[]) {
 	auto start = clock();
 	for( int n = 0; n < N; n++) {
 		for( int m = 0; m < N; m++) {
-			auto tmp1 = B[0][m] * detail::singleton<double>(1.0);
+			auto tmp1 = B[0][m] * A[0][m];
+			C[n][m] = tmp1;
 			auto tmp2 = B[0][m] * 5.0;
 			auto tmp3 = 5.0 * B[0][m];
-		//	tmp.store(C[n][m]);
-		//	nops += tmp.op_count();
+			nops += tmp1.op_count();
 		}
 	}
 	auto dt = (clock() - start) / double(CLOCKS_PER_SEC);

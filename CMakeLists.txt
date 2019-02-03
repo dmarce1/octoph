@@ -43,6 +43,7 @@ set(header_files
     octoph/cell/cell_directory.hpp
     octoph/cell/cell_location.hpp
     octoph/cell/cell_server.hpp
+    octoph/containers/containers.hpp
     octoph/exception/exception.hpp
  	${matrix_headers}
     octoph/math/math/math.hpp

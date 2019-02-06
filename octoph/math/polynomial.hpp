@@ -19,27 +19,82 @@
 namespace math {
 
 template<class T, std::size_t N>
-class polynomial {
+class polynomial: public std::array<T, N> {
 	constexpr static auto zero = T(0);
 	constexpr static auto one = T(1);
 	constexpr static auto two = T(2);
-	std::array<T, N> c_;
+	std::array<T, N>& c_;
 	using roots_type = std::array<std::complex<T>, N - 1>;
+
+	template<auto M, auto i, auto m = 0>
+	inline auto conj2(const polynomial<T, M>& other) const {
+		constexpr auto n = i - m;
+		if constexpr (n >= 0 && n < N) {
+			if constexpr (n == m) {
+				if constexpr (n < N - 1) {
+					return (other[m] * (*this)[n]) + conj2<M, i, m + 1>(other);
+				} else {
+					return (other[m] * (*this)[n]);
+				}
+			} else {
+				if constexpr (n < N - 1) {
+					return (other[m] * (*this)[n] + other[n] * (*this)[m]) + conj2<M, i, m + 1>(other);
+				} else {
+					return (other[m] * (*this)[n] + other[n] * (*this)[m]);
+				}
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	template<auto M, auto I = 0>
+	inline void conj1(const polynomial<T, M>& other, polynomial<T, M + N - 1>& rc) const {
+		if constexpr (I < N + M - 2) {
+			conj1<M, I + 1>(other, rc);
+		}
+		rc[I] = conj2<M, I>(other);
+	}
 public:
-
-	polynomial(const std::array<T, N>& c) :
-			c_(c) {
+	inline polynomial& operator=(const polynomial& other) {
+		c_ = other.c_;
+	}
+	inline polynomial& operator=(polynomial&& other) {
+		c_ = std::move(other.c_);
+	}
+	inline polynomial(const polynomial& other) :
+			c_(*this) {
+		c_ = other.c_;
+	}
+	inline polynomial(polynomial&& other) :
+			c_(*this) {
+		c_ = std::move(other.c_);
+	}
+	inline polynomial() :
+			c_(*this) {
+		for (auto i = 0; i < N; i++) {
+			c_[i] = zero;
+		}
+	}
+	inline polynomial(const std::array<T, N>& c) :
+			c_(*this) {
+		c_ = c;
 	}
 
-	T operator[](int i) const {
+	inline const T& operator[](int i) const {
 		return c_[i];
 	}
 
-	const T& operator[](int i) {
+	inline T& operator[](int i) {
 		return c_[i];
 	}
-
-	T operator()(const T& x0) const {
+	template<auto M>
+	inline auto conj(const polynomial<T, M>& other) const {
+		polynomial<T, M + N - 1> p;
+		conj1<M>(other, p);
+		return p;
+	}
+	inline T operator()(const T& x0) const {
 		T x = one;
 		T f = c_[0];
 		for (auto i = 1; i < N; i++) {
@@ -49,7 +104,7 @@ public:
 		return f;
 	}
 
-	std::complex<T> operator()(const std::complex<T>& x0) const {
+	inline std::complex<T> operator()(const std::complex<T>& x0) const {
 		std::complex<T> x = one;
 		std::complex<T> f = c_[0];
 		for (auto i = 1; i < N; i++) {
@@ -59,7 +114,7 @@ public:
 		return f;
 	}
 
-	polynomial<T, N - 1> d_dx() const {
+	inline polynomial<T, N - 1> d_dx() const {
 		std::array<T, N - 1> d;
 		for (auto i = 1; i < N; i++) {
 			d[i - 1] = T(i) * c_[i];
@@ -67,7 +122,7 @@ public:
 		return polynomial<T, N - 1>(d);
 	}
 
-	polynomial<T, N + 1> integral() const {
+	inline polynomial<T, N + 1> integral() const {
 		std::array<T, N + 1> I;
 		I[0] = 0;
 		for (auto i = 1; i < N + 1; i++) {
@@ -76,7 +131,7 @@ public:
 		return polynomial(I);
 	}
 
-	T root_upper_bound() const {
+	inline T root_upper_bound() const {
 		T amax = zero;
 		for (auto i = 0; i < N - 1; i++) {
 			amax = std::max(amax, std::abs(c_[i]));
@@ -84,7 +139,7 @@ public:
 		return one + amax / std::abs(c_[N - 1]);
 	}
 
-	T root_lower_bound() const {
+	inline T root_lower_bound() const {
 		T amax = zero;
 		const auto c0 = std::abs(c_[0]);
 		for (auto i = 1; i < N; i++) {
@@ -114,7 +169,7 @@ public:
 		T err;
 		auto iters = 0;
 		do {
-			if( iters > iters_max ) {
+			if (iters > iters_max) {
 				THROW("root solver failed to converge after 40 iterations.");
 			}
 			iters++;

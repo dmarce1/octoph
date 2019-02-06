@@ -191,6 +191,7 @@ void print(const A& a) {
 	}
 
 }
+
 }
 }
 #endif /* OCTOPH_MATRIX_MATRIX_HPP_ */

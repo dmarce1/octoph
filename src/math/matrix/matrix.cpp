@@ -26,6 +26,8 @@ int main() {
 
 //	print(math::matrix::copy(math::matrix::product(A,B)));
 
+	math::matrix::characteristic_polynomial(C);
+
 //print(C);
 	for( int d = 0; d < 10000000; d++) {
 		auto Q = math::matrix::QR_decomposition(C);

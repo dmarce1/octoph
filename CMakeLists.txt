@@ -32,6 +32,7 @@ set(source_files
     src/exception/exception.cpp
     src/math/math.cpp
     src/math/matrix/matrix.cpp
+    src/math/tensor.cpp
 )
 
 set(header_files

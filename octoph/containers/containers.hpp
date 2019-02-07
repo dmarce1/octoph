@@ -16,23 +16,38 @@ namespace ctrs {
 
 template<class C>
 struct safe_container : public C {
-private:
-	inline auto access( auto i )  {
+
+	using C::C;
+
+	using value_type = typename C::value_type;
+
+	inline C& operator=(const C& other) {
+		return dynamic_cast<C*>(this)->operator=(other);
+	}
+
+
+	inline const value_type& operator[]( int i ) const  {
 #ifndef NDEBUG
 		if( i < 0 || i >= C::size()) {
-			THROW( "Container index out of bounds\n");
+			THROW( "Container index out of bounds - range is %i - to %i - %i requested\n", 0, int(C::size() - 1), i);
 		}
 #endif
-		return C::operator[](i);
+		return dynamic_cast<const C*>(this)->operator[](i);
 	}
-public:
-	using C::C;
-	inline auto operator[]( auto i ) const  {
-		return access(i);
+
+
+
+	inline value_type& operator[]( int i ) {
+#ifndef NDEBUG
+		if( i < 0 || i >= C::size()) {
+			THROW( "Container index out of bounds - range is %i - to %i - %i requested\n", 0, int(C::size() - 1), i);
+		}
+#endif
+		return dynamic_cast<C*>(this)->operator[](i);
 	}
-	inline auto& operator[]( auto i )  {
-		return access(i);
-	}
+
+
+
 };
 
 template<class T>

@@ -13,48 +13,22 @@
 #include <cmath>
 #include <limits>
 #include <complex>
+#include <octoph/containers/containers.hpp>
 #include <octoph/exception/exception.hpp>
 #include <octoph/math/math.hpp>
+
+using namespace ctrs;
 
 namespace math {
 
 template<class T, std::size_t N>
-class polynomial: public std::array<T, N> {
+class polynomial: public array<T, N> {
 	constexpr static auto zero = T(0);
 	constexpr static auto one = T(1);
 	constexpr static auto two = T(2);
-	std::array<T, N>& c_;
+	array<T, N>& c_;
 	using roots_type = std::array<std::complex<T>, N - 1>;
 
-	template<auto M, auto i, auto m = 0>
-	inline auto conj2(const polynomial<T, M>& other) const {
-		constexpr auto n = i - m;
-		if constexpr (n >= 0 && n < N) {
-			if constexpr (n == m) {
-				if constexpr (n < N - 1) {
-					return (other[m] * (*this)[n]) + conj2<M, i, m + 1>(other);
-				} else {
-					return (other[m] * (*this)[n]);
-				}
-			} else {
-				if constexpr (n < N - 1) {
-					return (other[m] * (*this)[n] + other[n] * (*this)[m]) + conj2<M, i, m + 1>(other);
-				} else {
-					return (other[m] * (*this)[n] + other[n] * (*this)[m]);
-				}
-			}
-		} else {
-			return 0;
-		}
-	}
-
-	template<auto M, auto I = 0>
-	inline void conj1(const polynomial<T, M>& other, polynomial<T, M + N - 1>& rc) const {
-		if constexpr (I < N + M - 2) {
-			conj1<M, I + 1>(other, rc);
-		}
-		rc[I] = conj2<M, I>(other);
-	}
 public:
 	inline polynomial& operator=(const polynomial& other) {
 		c_ = other.c_;
@@ -88,10 +62,19 @@ public:
 	inline T& operator[](int i) {
 		return c_[i];
 	}
+
+	inline polynomial& get() {
+		return *this;
+	}
+
 	template<auto M>
 	inline auto conj(const polynomial<T, M>& other) const {
-		polynomial<T, M + N - 1> p;
-		conj1<M>(other, p);
+		polynomial<T, N + M - 1> p;
+		for (int n = 0; n < N; n++) {
+			for (int m = 0; m < M; m++) {
+				p[n + m] += (*this)[n] * other[m];
+			}
+		}
 		return p;
 	}
 	inline T operator()(const T& x0) const {

@@ -7,9 +7,7 @@
 
 #include <octoph/exception/exception.hpp>
 
-exception::exception(int line, const char* file, const char* function, const char* message) :
-		line_(line), file_(file), function_(function), message_(message == nullptr ? "" : message) {
-}
+
 
 void exception::print_and_exit() const {
 	printf("Exception thrown by %s: %s line %i.\n", function_.c_str(), file_.c_str(), line_);

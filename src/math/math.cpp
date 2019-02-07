@@ -8,7 +8,6 @@
 #include <iostream>
 #include <hpx/hpx_init.hpp>
 
-
 constexpr auto N = 3;
 constexpr auto L = 10000000;
 
@@ -18,54 +17,46 @@ struct accesst {
 	int begin();
 };
 
-struct no_access {};
+struct no_access {
+};
+
+struct class1 {
+	~class1() {
+		printf("1\n");
+	}
+};
+struct class2 {
+	class2() = default;
+	std::vector<double> v;
+	class2(class2&& o) {
+		printf( "moving\n");
+	}
+	class2& operator=(class2&& o) = delete;
+	class2(const class2&) = delete;
+	class2& operator=(const class2&) = delete;
+	~class2() {
+		printf("2\n");
+	}
+};
+
+class2 test() {
+	class1 one;
+	class2 two;
+	return two;
+}
 
 #ifdef TEST_MATH
 #include <array>
 
 int main(int argc, char* argv[]) {
+	test();
 	hpx::init(argc, argv);
 }
 
 int hpx_main(int argc, char* argv[]) {
 
+	math_container<std::vector<double>> test;
 
-	using namespace math::containers;
-	std::array<std::array<std::vector<double>, N>, N> A, B, C;
-	for( int n = 0; n < N; n++) {
-		for( int m = 0; m < N; m++) {
-			A[n][m].resize(L);
-			B[n][m].resize(L);
-			C[n][m].resize(L);
-			for( int l = 0; l < L; l++) {
-				A[n][m][l] = double(rand() % 2000 - 1000);
-				B[n][m][l] = double(rand() % 2000 - 1000);
-				C[n][m][l] = 0.0;
-			}
-		}
-	}
-	std::array<int,4> a, b;
-
-	a = -b;
-
-	long long nops;
-	auto start = clock();
-	for( int n = 0; n < N; n++) {
-		for( int m = 0; m < N; m++) {
-			auto tmp1 = -B[0][m];
-			C[n][m] = tmp1;
-			auto tmp2 = B[0][m] * 5.0;
-			C[n][m] = tmp2;
-			auto tmp3 = A[0][m] * B[0][m];
-			C[n][m] = tmp3;
-			nops += tmp1.op_count();
-		}
-	}
-	auto dt = (clock() - start) / double(CLOCKS_PER_SEC);
-	std::cout << (nops/dt) << "\n";
-
-	auto p = math::polynomial<double,5>(std::array<double,5>( { {1, 4, 1,0,-1}}));
-	p.all_roots();
 	return hpx::finalize();
 
 }

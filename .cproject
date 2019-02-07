@@ -37,7 +37,7 @@
                             							
                             <targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1121069135.1981646359" name=""/>
                             							
-                            <builder buildPath="${workspace_loc:/octoph}/release" id="org.eclipse.cdt.build.core.settings.default.builder.1339423146" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="false" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+                            <builder buildPath="${workspace_loc:/octoph}/release" id="org.eclipse.cdt.build.core.settings.default.builder.1339423146" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
                             							
                             <tool id="org.eclipse.cdt.build.core.settings.holder.libs.1431639591" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
                             							

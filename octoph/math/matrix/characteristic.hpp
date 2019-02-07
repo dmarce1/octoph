@@ -5,7 +5,7 @@
 #include <octoph/math/containers.hpp>
 #include <octoph/math/matrix/comatrix.hpp>
 #include <octoph/math/matrix/matrix.hpp>
-
+/*
 namespace math {
 
 namespace matrix {
@@ -16,20 +16,23 @@ template<class A, class T, int J>
 auto characteristic_polynomial1(const A& a, T& pin) {
 	constexpr auto N = A::nrow;
 	using type = typename A::value_type;
-
+	printf( " in %i %i\n", N, J);
 	polynomial<type, 2> p0;
 	p0[0] = a.template get<0, 0>();
 	if constexpr (N == 1) {
-		return p0.conj(pin);
+		return p0.conj(pin).get();
 	} else {
 		const auto co = comatrix<A, 0, J>(a);
-		const auto next_pin = p0.conj(pin);
-		const auto det_co = characteristic_polynomial1<decltype(co), decltype(next_pin), 0>(a, next_pin);
+		const auto next_pin = p0.conj(pin).get();
+		const auto det_co = characteristic_polynomial1<decltype(co), decltype(next_pin), 0>(a, next_pin).get();
 		if constexpr (J < N - 1) {
-			constexpr type sign = (J % 2 == 0) ? type(1) : -type(1);
-			return det_co + sign * characteristic_polynomial1<decltype(co), decltype(pin), J + 1>(a, pin);
+			if constexpr( J % 2 == 0 ) {
+				return (det_co + characteristic_polynomial1<A, decltype(pin), J + 1>(a, pin)).get();
+			} else {
+				return (det_co - characteristic_polynomial1<A, decltype(pin), J + 1>(a, pin)).get();
+			}
 		} else {
-			return pin.conj(det_co);
+			return pin.conj(det_co).get();
 		}
 	}
 
@@ -46,7 +49,7 @@ struct identity: public matrix<T, N, N, mask_diagonal<N> > {
 
 	constexpr identity() {
 		for (int i = 0; i < N; i++) {
-	//		(*this)(i, i) = 1;
+			(*this)(i, i) = 1;
 		}
 	}
 	identity(identity&&) = default;
@@ -61,12 +64,12 @@ auto characteristic_polynomial(const A& a) {
 	using type = typename A::value_type;
 	polynomial<type, 1> p0;
 	p0[0] = 1;
-	const identity<A, N> delta;
+	const identity<double, N> delta;
 	return characteristic_polynomial1<A, decltype(p0), 0>(a, p0);
 }
 
 }
 
 }
-
+*/
 #endif

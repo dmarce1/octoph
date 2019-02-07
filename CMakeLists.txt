@@ -120,6 +120,7 @@ add_hpx_executable(
   DEPENDENCIES
     ${dependencies}
 SOURCES
+	src/exception/exception.cpp 
 	src/math/matrix/matrix.cpp 
 	src/math/math.cpp  
 HEADERS

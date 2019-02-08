@@ -75,8 +75,8 @@ struct multiindex<I> : public std::integer_sequence<int, I> {
 		return I;
 	}
 
-	template<class L>
-	using split = multiindex;
+	template<int L>
+	using split = typename std::conditional< L==0, std::pair<multiindex<>, multiindex<I>>, std::pair<multiindex<I>, multiindex<>>>::type;
 
 	static void print(bool first = true) {
 		if (first) {
@@ -97,6 +97,10 @@ struct multiindex<I> : public std::integer_sequence<int, I> {
 template<>
 struct multiindex<> : public std::integer_sequence<int> {
 	using base_type = std::integer_sequence<int>;
+
+	template<int L>
+	using split =std::pair<multiindex<>, multiindex<>>;
+
 	static void print(bool first = true) {
 		if (first) {
 			printf("\n");
@@ -117,6 +121,27 @@ auto multiindex_cat(const multiindex<I...>& a, const multiindex<J...>& b) {
 	return i;
 }
 
+template<int I, int J, int ...K>
+auto reorder_multiindex(const multiindex<K...>& a) {
+	if constexpr( I > J ) {
+		return reorder_multiindex<J,I>(a);
+	} else if constexpr( I < J ) {
+		using type = multiindex<K...>;
+		using ab = typename type::template split<I>;
+		using bc = typename decltype(ab().second)::template split<J-I>;
+		using part1 = decltype(ab().first);
+		using part2 = decltype(bc().first);
+		using part3 = decltype(bc().second);
+		using part2_split = typename part2::template split<1>;
+		using part3_split = typename part3::template split<1>;
+		return multiindex_cat(part1(),
+				multiindex_cat(part3_split().first,
+						multiindex_cat(part2_split().second, multiindex_cat(part2_split().first, part3_split().second))));
+	} else {
+		return a;
+	}
+}
+
 #ifdef TEST_MATH
 
 int main(int argc, char* argv[]) {
@@ -125,15 +150,9 @@ int main(int argc, char* argv[]) {
 
 int hpx_main(int argc, char* argv[]) {
 
-	multiindex<1,2,3,4,5> test;
-	test.print();
+	multiindex<0,1,2,3,4,5> test;
 
-	using split = typename decltype(test)::split<3>;
-	split().first.print();
-	split().second.print();
-
-	using cat_type = decltype(multiindex_cat( split().first, split().second));
-	cat_type::print();
+	reorder_multiindex<4,2>(test).print();
 
 	return hpx::finalize();
 

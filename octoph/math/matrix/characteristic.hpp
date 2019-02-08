@@ -5,12 +5,10 @@
 #include <octoph/math/containers.hpp>
 #include <octoph/math/matrix/comatrix.hpp>
 #include <octoph/math/matrix/matrix.hpp>
-/*
+
 namespace math {
 
 namespace matrix {
-
-using namespace math::containers;
 
 template<class A, class T, int J>
 auto characteristic_polynomial1(const A& a, T& pin) {
@@ -71,5 +69,5 @@ auto characteristic_polynomial(const A& a) {
 }
 
 }
-*/
+
 #endif

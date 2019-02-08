@@ -16,13 +16,14 @@
 #include <octoph/containers/containers.hpp>
 #include <octoph/exception/exception.hpp>
 #include <octoph/math/math.hpp>
+#include <octoph/math/containers.hpp>
 
 using namespace ctrs;
 
 namespace math {
 
 template<class T, std::size_t N>
-class polynomial: public array<T, N> {
+class polynomial: public math_array<T, N> {
 	constexpr static auto zero = T(0);
 	constexpr static auto one = T(1);
 	constexpr static auto two = T(2);

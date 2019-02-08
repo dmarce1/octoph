@@ -16,8 +16,15 @@
 
 #ifdef TEST_MATRIX
 
+class test {
+public:
+	int operator[]( std::array<double,3> t) {
+		return 0;
+	}
+};
 int main() {
-	return 0;
+	test t;
+	return t[std::array<double,3>()];
 }
 
 #endif

@@ -47,6 +47,7 @@ set(header_files
     octoph/containers/containers.hpp
     octoph/exception/exception.hpp
  	${matrix_headers}
+    octoph/math/math/multiindex.hpp
     octoph/math/math/math.hpp
     octoph/math/polynomial.hpp
 )

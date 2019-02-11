@@ -10,11 +10,61 @@
 
 #include <utility>
 
+namespace math {
+
 template<int...>
 struct multiindex;
 
+template<int Dim, int...>
+struct multiindex_increment_type;
+
+template<class I, int J, int K>
+constexpr int multiindex_pair_order() {
+	if constexpr (I::template get<J>() > I::template get<K>()) {
+		return +1;
+	} else if constexpr (I::template get<J>() > I::template get<K>()) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+template<int Dim, int J, int ...K>
+struct multiindex_increment_type<Dim, J, K...> {
+	template<int ...I>
+	using type_help = typename std::conditional<
+	J < Dim - 1,
+	multiindex<I...,J+1,K...>,
+	typename multiindex_increment_type<Dim, K...>::template type_help<I...,0>
+	>::type;
+
+	using type = type_help<>;
+};
+
+template<int Dim>
+struct multiindex_increment_type<Dim> {
+	template<int ...I>
+	using type_help = void;
+
+	using type = type_help<>;
+};
+
+template<int Dim, int J, int ...K>
+auto multiindex_increment(const multiindex<J, K...>& a) {
+	using T = typename multiindex_increment_type<Dim,J,K...>::type;
+	if constexpr(std::is_same<T,void>::value) {
+		return;
+	} else {
+		T b;
+		return b;
+	}
+}
+
 template<int I, int J, int ...K>
 struct multiindex<I, J, K...> : public std::integer_sequence<int, I, J, K...> {
+
+	template<int Dim>
+	using next_index_type = decltype(multiindex_increment<Dim>(multiindex()));
 
 	template<int L>
 	static int get() {
@@ -48,7 +98,8 @@ public:
 private:
 
 	template<int L, int M, int ...N>
-	struct split_help<L,M,N...> {
+	struct split_help<L,M,N...>
+	{
 		template<int ...O>
 		using type_help = typename std::conditional<
 		L!=0,
@@ -59,7 +110,8 @@ private:
 	};
 
 	template<int L>
-	struct split_help<L> {
+	struct split_help<L>
+	{
 		template<int ...O>
 		using type_help = std::pair<multiindex<O...>, multiindex<>>;
 		using type = type_help<>;
@@ -69,6 +121,9 @@ private:
 
 template<int I>
 struct multiindex<I> : public std::integer_sequence<int, I> {
+
+	template<int Dim>
+	using next_index_type = decltype(multiindex_increment<Dim>(multiindex()));
 
 	template<int L>
 	static int get() {
@@ -94,6 +149,9 @@ private:
 
 template<>
 struct multiindex<> : public std::integer_sequence<int> {
+
+	template<int Dim>
+	using next_index_type = void;
 
 	static void print(bool first = true) {
 		if (first) {
@@ -129,41 +187,14 @@ auto reorder_multiindex(const multiindex<K...>& a) {
 		using part3_split = typename part3::template split<1>;
 		return multiindex_cat(part1(),
 				multiindex_cat(part3_split().first,
-						multiindex_cat(part2_split().second, multiindex_cat(part2_split().first, part3_split().second))));
+						multiindex_cat(part2_split().second,
+								multiindex_cat(part2_split().first,
+										part3_split().second))));
 	} else {
 		return a;
 	}
 }
 
-template<int Dim, int...>
-struct multiindex_increment_type;
-
-template<int Dim, int J, int ...K>
-struct multiindex_increment_type<Dim, J, K...> {
-	template<int ...I>
-	using type_help = typename std::conditional<
-			J < Dim - 1,
-			multiindex<I...,J+1,K...>,
-			typename multiindex_increment_type<Dim, K...>::template type_help<I...,0>
-	>::type;
-
-	using type = type_help<>;
-};
-
-template<int Dim>
-struct multiindex_increment_type<Dim> {
-	template<int ...I>
-	using type_help = void;
-
-	using type = type_help<>;
-};
-
-template<int Dim, int J, int ...K>
-auto multiindex_increment(const multiindex<J, K...>& a) {
-	using T = typename multiindex_increment_type<Dim,J,K...>::type;
-	T b;
-	return b;
 }
-;
 
 #endif /* OCTOPH_MATH_MULTIINDEX_HPP_ */

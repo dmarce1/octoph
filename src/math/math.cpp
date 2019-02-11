@@ -2,7 +2,7 @@
 #include <octoph/math/containers.hpp>
 #include <hpx/hpx_init.hpp>
 
-#include <octoph/math/multiindex.hpp>
+#include <octoph/math/tensor.hpp>
 
 #ifdef TEST_MATH
 
@@ -12,28 +12,9 @@ int main(int argc, char* argv[]) {
 
 int hpx_main(int argc, char* argv[]) {
 
-	multiindex<0,0,0> test;
+	math::tensor_access<3,4,math::SYMMETRIC,math::SYMMETRIC> test;
 
-	auto a = multiindex_increment<3>(test);
-	auto b = multiindex_increment<3>(a);
-	auto c = multiindex_increment<3>(b);
-	auto d = multiindex_increment<3>(c);
-	auto e = multiindex_increment<3>(d);
-	auto f = multiindex_increment<3>(e);
-	auto g = multiindex_increment<3>(f);
-	auto h = multiindex_increment<3>(g);
-	auto i = multiindex_increment<3>(h);
-	auto j = multiindex_increment<3>(i);
-	a.print();
-	b.print();
-	c.print();
-	d.print();
-	e.print();
-	f.print();
-	g.print();
-	h.print();
-	i.print();
-	j.print();
+	test.multiindex_to_flat_index(math::multiindex<0,0,0>());
 
 	return hpx::finalize();
 
